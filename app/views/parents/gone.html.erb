@@ -1,0 +1,11 @@
+<% content_for :title, "Launchpad" %>
+<div class="narrow parent-page">
+  <p class="eyebrow parent-brand"><%= brand_mark(size: 22) %> Launchpad · for parents and guardians</p>
+  <% if @deleted_message %>
+    <h1>Done</h1>
+    <p><%= @deleted_message %> We kept only a record that the deletion happened, with no personal information.</p>
+  <% else %>
+    <h1>This link doesn't work anymore</h1>
+    <p>The account may have been deleted, or the link was mistyped. Contact <%= Launchpad::Privacy.operator[:email] %> if you need help.</p>
+  <% end %>
+</div>

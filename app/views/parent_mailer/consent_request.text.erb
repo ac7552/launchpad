@@ -1,0 +1,15 @@
+Hi <%= @consent.parent_name %>,
+
+<%= @consent.student.first_name %>'s coding program uses Launchpad, a website where kids learn to code with blocks and Ruby.
+Because <%= @consent.student.first_name %> is under 13, we need your permission before they can use it.
+
+Read what we collect and choose what to allow:
+<%= @link %>
+
+You decide separately whether <%= @consent.student.first_name %> can use the AI coach. Without it, they get written hints instead.
+
+If we don't hear from you within <%= Launchpad::Privacy::UNCONSENTED_DAYS %> days, we'll delete <%= @consent.student.first_name %>'s account.
+
+Questions? Contact <%= @operator[:name] %> at <%= @operator[:email] %> or <%= @operator[:phone] %>.
+
+Keep this email: the same link lets you see, download, or delete <%= @consent.student.first_name %>'s information at any time.

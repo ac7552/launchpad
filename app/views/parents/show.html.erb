@@ -1,0 +1,61 @@
+<% content_for :title, "Permission for #{@student.first_name}" %>
+<div class="narrow parent-page">
+  <p class="eyebrow parent-brand"><%= brand_mark(size: 22) %> Launchpad · for parents and guardians</p>
+
+  <% case @consent.status %>
+  <% when "requested" %>
+    <h1>Permission for <%= @student.first_name %> to use Launchpad</h1>
+    <p class="muted">Launchpad is the website <%= @student.first_name %>'s coding program uses to teach coding with blocks and Ruby. Because <%= @student.first_name %> is under 13, federal law (COPPA) says we need your permission first. Please read what we collect, then choose what to allow.</p>
+
+    <%= render "shared/privacy_notice", child: @student.first_name %>
+
+    <%= form_with url: parent_submit_path(@consent.token), class: "card stack consent-form" do %>
+      <h2>Your choices</h2>
+      <label class="toggle"><%= check_box_tag :account_consent, "1", false, required: true %>
+        <span><strong>Yes, <%= @student.first_name %> may use Launchpad</strong><br><span class="muted small">Required for <%= @student.first_name %> to take part. We collect only what's listed above.</span></span></label>
+      <label class="toggle"><%= check_box_tag :ai_consent, "1", false %>
+        <span><strong>Yes, <%= @student.first_name %> may use the AI coach</strong> <span class="muted small">(optional)</span><br><span class="muted small">Sends project code (names removed) and button presses to Anthropic. Without it, <%= @student.first_name %> gets written hints.</span></span></label>
+      <label class="toggle"><%= check_box_tag :guardian, "1", false, required: true %>
+        <span>I'm <%= @student.first_name %>'s parent or legal guardian.</span></label>
+      <label class="field"><span>Type your full name to sign</span><%= text_field_tag :signature_name, nil, required: true, autocomplete: "name", maxlength: 100 %></label>
+      <%= submit_tag "Give permission", class: "btn btn-primary" %>
+      <p class="muted small">After you sign, the program will confirm it's really you (usually by checking a signed form at pickup) before <%= @student.first_name %> can sign in.</p>
+    <% end %>
+
+    <%= button_to "I don't give permission — delete #{@student.first_name}'s account", parent_decline_path(@consent.token),
+          class: "btn btn-quiet", form: { data: { turbo_confirm: "This deletes #{@student.first_name}'s account. Are you sure?" } } %>
+
+  <% when "submitted" %>
+    <h1>Thank you, <%= @consent.parent_name.split.first %>!</h1>
+    <p>You signed on <%= @consent.submitted_at.to_date.to_fs(:long) %>. The program will confirm your permission with you (usually with a signed form at pickup). Then <%= @student.first_name %> can sign in.</p>
+    <p>AI coach: <strong><%= @consent.ai_consent? ? "allowed" : "not allowed — written hints only" %></strong></p>
+    <%= render "parents/rights" %>
+
+  <% when "verified" %>
+    <h1><%= @student.first_name %>'s Launchpad account</h1>
+    <p class="muted">Permission confirmed <%= @consent.verified_at.to_date.to_fs(:long) %>.</p>
+    <div class="card stack">
+      <h2>AI coach</h2>
+      <p>
+        <% if @consent.ai_allowed? %>✅ On — hints may come from the AI coach.
+        <% elsif @consent.ai_pending? %>⏳ You turned it on. The program will confirm with you before it starts.
+        <% else %>Off — <%= @student.first_name %> gets written hints only.<% end %>
+      </p>
+      <%= button_to (@consent.ai_consent? ? "Turn the AI coach off" : "Turn the AI coach on"), parent_ai_path(@consent.token),
+            params: { ai_consent: @consent.ai_consent? ? "0" : "1" }, class: "btn btn-quiet" %>
+    </div>
+    <div class="card">
+      <h2>What we have</h2>
+      <ul>
+        <li><%= pluralize(@student.projects.count, "project") %></li>
+        <li><%= pluralize(@student.help_sessions.count, "help request") %></li>
+        <li><%= pluralize(@student.skill_checks.count, "milestone") %> passed</li>
+      </ul>
+    </div>
+    <%= render "parents/rights" %>
+  <% end %>
+
+  <% unless @consent.requested? %>
+    <details class="notice-again"><summary>Read the full privacy notice</summary><%= render "shared/privacy_notice", child: @student.first_name %></details>
+  <% end %>
+</div>

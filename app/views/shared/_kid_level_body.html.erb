@@ -1,0 +1,27 @@
+<%# locals: (stage:, passed:, current: false) %>
+<% goals = stage.milestones %>
+<% done = goals.count { |m| passed.include?(m.id) } %>
+  <ul class="learn-list">
+    <li class="learn learn-coding"><span class="learn-icon" aria-hidden="true">💻</span><span><span class="learn-what">Code</span><%= stage.kid_coding %></span></li>
+    <li class="learn learn-ai"><span class="learn-icon" aria-hidden="true">🤖</span><span><span class="learn-what">AI</span><%= stage.kid_ai %></span></li>
+    <li class="learn learn-computer"><span class="learn-icon" aria-hidden="true">⌨️</span><span><span class="learn-what">Computer</span><%= stage.kid_computer %></span></li>
+  </ul>
+
+  <p class="make"><span class="make-icon" aria-hidden="true">🎮</span><span><span class="label">Make</span><br><%= stage.kid_project %></span></p>
+
+  <div class="goals-head">
+    <h3>Goals</h3>
+    <span class="label"><%= done %> of <%= goals.size %></span>
+  </div>
+  <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="<%= goals.size %>" aria-valuenow="<%= done %>">
+    <% if done.positive? %><span style="width: <%= done * 100 / goals.size %>%"></span><% end %>
+  </div>
+  <ul class="goals">
+    <% goals.each do |m| %>
+      <li class="goal <%= 'done' if passed.include?(m.id) %>">
+        <span class="goal-check" aria-hidden="true"><%= "✓" if passed.include?(m.id) %></span>
+        <span class="goal-text"><%= m.kid_description || m.description %></span>
+      </li>
+    <% end %>
+  </ul>
+  <% if current %><p class="small muted level-note">Your teacher checks off goals when you show them. Finish them all to unlock the next level!</p><% end %>

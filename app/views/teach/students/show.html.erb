@@ -1,0 +1,77 @@
+<% content_for :title, @student.name %>
+<section class="hero">
+  <div>
+    <p class="eyebrow">Grade <%= @student.grade %> · <%= @student.username %> · <%= @student.typing_allowed? ? "13+ (may type to AI)" : "under 13 (guided coach only)" %></p>
+    <h1><%= @student.name %></h1>
+    <p class="muted">Current stage: <strong><%= @stage.name %></strong></p>
+  </div>
+</section>
+
+<% if @consent %>
+  <section class="card consent-card">
+    <div class="row between">
+      <h2>Parent permission</h2>
+      <span class="badge <%= @consent.account_allowed? ? 'badge-delivered' : 'badge-held' %>"><%= { "requested" => "Waiting for parent", "submitted" => "Parent signed — verify", "verified" => "Verified" }.fetch(@consent.status, @consent.status) %></span>
+    </div>
+    <p class="small"><%= @consent.parent_name %> · <%= @consent.parent_email %> · AI coach: <strong><%= @consent.ai_allowed? ? "allowed" : (@consent.ai_pending? ? "parent turned on — verify" : "not allowed (written hints)") %></strong></p>
+    <% if @consent.requested? %>
+      <p class="small muted">If the parent doesn't answer by <%= @consent.deletion_deadline.to_date.to_fs(:long) %>, this account is deleted.</p>
+      <div class="row">
+        <%= button_to "Resend permission email", teach_student_consent_path(@student), class: "btn btn-quiet btn-sm" %>
+        <span class="small muted">Or share the parent link: <code class="copyable"><%= parent_consent_url(@consent.token) %></code></span>
+      </div>
+    <% elsif @consent.needs_staff? %>
+      <%= render "teach/consents/verify_form", consent: @consent %>
+    <% else %>
+      <p class="small muted">Verified <%= @consent.verified_at.to_date.to_fs(:short) %> by <%= @consent.verified_by&.name %> (<%= Launchpad::Privacy::VERIFICATION_METHODS[@consent.verification_method] %>).</p>
+    <% end %>
+  </section>
+<% end %>
+
+<div class="two-col">
+  <section id="milestones">
+    <h2>Milestones</h2>
+    <p class="muted small">Check off a milestone when the student shows the skill. Students move to the next stage when every milestone in their stage is checked.</p>
+    <% @stages.select { |s| s.position.between?(Stage.for_grade(@student.grade).position, @stage.position + 1) }.each do |stage| %>
+      <div class="card milestone-card <%= 'is-current' if stage == @stage %>">
+        <h3>Grade <%= stage.grades %> · <%= stage.name %></h3>
+        <ul class="milestones editable">
+          <% stage.milestones.each do |m| %>
+            <% check = @checks[m.id] %>
+            <li class="<%= 'done' if check %>">
+              <% if check %>
+                <%= button_to "✓", teach_student_skill_check_path(@student, check), method: :delete, class: "check-btn is-on", title: "Uncheck" %>
+              <% else %>
+                <%= button_to "", teach_student_skill_checks_path(@student, milestone_id: m.id), class: "check-btn", title: "Mark as shown" %>
+              <% end %>
+              <span class="cat cat-<%= m.category %>"><%= category_label(m.category) %></span>
+              <span><%= m.description %><% if check %><span class="muted small"> · <%= check.created_at.to_date.to_fs(:short) %></span><% end %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
+    <h2>Projects</h2>
+    <% @projects.each do |project| %>
+      <%= link_to teach_project_path(project), class: "project-tile" do %>
+        <span class="project-title"><%= project.title %></span>
+        <span class="share-bar"><span style="width: <%= project.kid_share %>%"></span></span>
+        <span class="small"><%= project.kid_share %>% written by student · <%= project.line_counts[:ai] %> AI lines
+          <% if project.needs_hand_edit? %> · <strong class="warn">no hand edits after AI</strong><% end %></span>
+      <% end %>
+    <% end %>
+    <% if @projects.empty? %><p class="muted">No projects yet.</p><% end %>
+
+    <h2>AI log</h2>
+    <%= render partial: "teach/reviews/interaction_row", collection: @interactions, as: :interaction %>
+    <% if @interactions.empty? %><p class="muted">No AI requests yet.</p><% end %>
+  </section>
+</div>
+
+<section class="danger-zone">
+  <%= button_to "Delete #{@student.name}'s account and all data", erase_teach_student_path(@student), method: :delete, class: "btn btn-quiet btn-sm",
+        form: { data: { turbo_confirm: "Permanently delete #{@student.name}'s account, projects, and history? This can't be undone." } } %>
+</section>

@@ -1,0 +1,22 @@
+<% content_for :title, "Add student" %>
+<div class="narrow">
+  <p class="eyebrow"><%= link_to @classroom.name, teach_classroom_path(@classroom) %></p>
+  <h1>Add a student</h1>
+  <%= form_with model: @student, url: teach_classroom_students_path(@classroom), class: "stack card" do |form| %>
+    <% if @student.errors.any? %><p class="flash flash-alert"><%= @student.errors.full_messages.to_sentence %></p><% end %>
+    <label class="field"><span>Student's first name and last initial</span><%= form.text_field :name, required: true, autofocus: true, placeholder: "Maya L." %></label>
+    <label class="field"><span>Username</span><%= form.text_field :username, required: true, autocapitalize: "off" %></label>
+    <label class="field"><span>Grade</span><%= form.select :grade, (4..12).to_a, {}, required: true %></label>
+    <label class="field"><span>Birth year</span><%= form.number_field :birth_year, required: true, min: 1990, max: Date.current.year, placeholder: (Date.current.year - 10).to_s %></label>
+    <p class="muted small">Birth year decides who can type to the AI: only students who are definitely 13 or older. Grade alone isn't enough.</p>
+    <fieldset class="stack-sm">
+      <legend>Parent or guardian <span class="muted small">(required if the student is under 13)</span></legend>
+      <label class="field"><span>Name</span><%= text_field_tag "parent[name]", @parent&.dig(:name), autocomplete: "off" %></label>
+      <label class="field"><span>Email</span><%= email_field_tag "parent[email]", @parent&.dig(:email), autocomplete: "off" %></label>
+      <p class="muted small">We email them a permission request. The student can't sign in until they agree and you verify it.</p>
+    </fieldset>
+    <label class="field"><span>Starting password</span><%= form.text_field :password, required: true, autocomplete: "new-password" %></label>
+    <p class="muted small">Use the student's school ID or a nickname for the username — not their full name. No email is needed.</p>
+    <div class="row"><%= form.submit "Add student", class: "btn btn-primary" %><%= link_to "Cancel", teach_classroom_path(@classroom), class: "btn btn-quiet" %></div>
+  <% end %>
+</div>

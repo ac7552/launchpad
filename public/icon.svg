@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Launchpad: a white rocket on a Duolingo-green rounded square. -->
+  <rect width="512" height="512" rx="120" fill="#58cc02"/>
+  <g transform="translate(256 262) rotate(45) scale(0.86) translate(-256 -272)">
+    <!-- flame -->
+    <path d="M222 372 Q256 470 290 372 Z" fill="#ffc800"/>
+    <path d="M238 372 Q256 430 274 372 Z" fill="#ff9600"/>
+    <!-- fins -->
+    <path d="M206 300 L150 372 L206 360 Z" fill="#1cb0f6"/>
+    <path d="M306 300 L362 372 L306 360 Z" fill="#1cb0f6"/>
+    <!-- body -->
+    <path d="M256 72 C318 124 330 220 314 372 L198 372 C182 220 194 124 256 72 Z" fill="#ffffff"/>
+    <!-- window -->
+    <circle cx="256" cy="210" r="34" fill="#1cb0f6"/>
+    <circle cx="256" cy="210" r="18" fill="#ddf4ff"/>
+  </g>
+</svg>

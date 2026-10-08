@@ -1,0 +1,2 @@
+<%= turbo_stream.remove "ai_empty" %>
+<%= turbo_stream.append "ai_log", partial: "ai_interactions/ai_interaction", locals: { ai_interaction: @interaction.reload } %>

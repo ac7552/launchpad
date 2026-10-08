@@ -1,0 +1,24 @@
+<% content_for :title, "Classes" %>
+<header class="page-head page-head-row">
+  <div>
+    <p class="label">[ <%= format("%02d", @classrooms.size) %> ] classes<%= " · [ #{format('%02d', @review_count)} ] to review" if @review_count.positive? %></p>
+    <h1>Classes</h1>
+  </div>
+  <%= link_to "+ New class", new_teach_classroom_path, class: "btn btn-primary" %>
+</header>
+
+<ol class="rows">
+  <% @classrooms.each_with_index do |classroom, i| %>
+    <li>
+      <%= link_to teach_classroom_path(classroom), class: "row-item" do %>
+        <span class="row-num"><%= format("%02d", i + 1) %></span>
+        <div>
+          <p class="row-name"><%= classroom.name %></p>
+          <p class="row-meta"><%= pluralize(classroom.students.size, "student") %> · <span class="light-dot light-<%= classroom.policy.light %>"></span> <%= AiPolicy::LIGHTS[classroom.policy.light][:label] %><%= " · you check AI answers" if classroom.policy.review_required? %></p>
+        </div>
+        <span class="row-aside row-arrow" aria-hidden="true">→</span>
+      <% end %>
+    </li>
+  <% end %>
+  <% if @classrooms.empty? %><li class="row-empty">No classes yet. Make your first one.</li><% end %>
+</ol>

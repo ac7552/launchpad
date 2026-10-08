@@ -1,0 +1,24 @@
+<% content_for :title, "Projects" %>
+<div class="projects-head">
+  <div>
+    <p class="label">[ <%= format("%02d", @projects.size) %> ] projects</p>
+    <h1>My projects</h1>
+  </div>
+</div>
+
+<div class="project-grid">
+  <%= link_to new_project_path, class: "project-cell new-cell" do %>
+    <span class="thumb" aria-hidden="true">+</span>
+    <span>New project</span>
+  <% end %>
+  <% @projects.each do |project| %>
+    <%= link_to project, class: "project-cell" do %>
+      <span class="thumb" aria-hidden="true"><%= project_emoji(project) %></span>
+      <span class="label"><%= editor_label(project.editor_mode) %> · <%= time_ago_in_words(project.updated_at).delete_prefix("about ") %> ago</span>
+      <span class="project-title"><%= project.title %></span>
+      <span class="share-bar" title="<%= project.kid_share %>% made by you"><span style="width: <%= project.kid_share %>%"></span></span>
+      <span class="small muted"><%= project.kid_share %>% made by you</span>
+      <% if project.needs_hand_edit? %><span class="small warn">✋ Change something to make it yours</span><% end %>
+    <% end %>
+  <% end %>
+</div>

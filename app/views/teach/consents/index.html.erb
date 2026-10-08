@@ -1,0 +1,42 @@
+<% content_for :title, "Permission" %>
+<header class="page-head">
+  <p class="label">[ <%= format("%02d", @to_verify.size) %> ] to verify · [ <%= format("%02d", @waiting.size) %> ] waiting</p>
+  <h1>Permission</h1>
+  <p class="lede">Kids under 13 need a parent's yes. Then you check it's really the parent, usually with the signed form at pickup.</p>
+</header>
+
+<p class="label section-label">Ready to verify</p>
+<ol class="rows">
+  <% @to_verify.each_with_index do |c, i| %>
+    <li class="row-item">
+      <span class="row-num"><%= format("%02d", i + 1) %></span>
+      <div>
+        <p class="row-name"><%= link_to c.student.name, teach_student_path(c.student) %></p>
+        <p class="row-meta">Signed by <%= c.signature_name %> · <%= c.parent_email %> · <%= c.submitted_at&.to_date&.to_fs(:short) %></p>
+        <div class="row-tags">
+          <span class="pill pill-green">Launchpad ✓</span>
+          <span class="pill <%= c.ai_consent? ? 'pill-green' : '' %>">AI coach <%= c.ai_consent? ? "✓" : "✕" %></span>
+          <% if c.ai_pending? %><span class="pill pill-gold">AI newly turned on</span><% end %>
+        </div>
+      </div>
+      <div class="row-aside"><%= render "teach/consents/verify_form", consent: c %></div>
+    </li>
+  <% end %>
+  <% if @to_verify.empty? %><li class="row-empty">Nothing to verify. 🎉</li><% end %>
+</ol>
+
+<p class="label section-label">Waiting for parents</p>
+<ol class="rows">
+  <% @waiting.each_with_index do |c, i| %>
+    <li class="row-item">
+      <span class="row-num"><%= format("%02d", i + 1) %></span>
+      <div>
+        <p class="row-name"><%= link_to c.student.name, teach_student_path(c.student) %></p>
+        <p class="row-meta"><%= c.parent_name %> · <%= c.parent_email %></p>
+        <p class="row-meta">Asked <%= c.requested_at.to_date.to_fs(:short) %> · deleted <%= c.deletion_deadline.to_date.to_fs(:short) %> if no answer</p>
+      </div>
+      <div class="row-aside"><%= button_to "Resend email", teach_student_consent_path(c.student), class: "btn btn-quiet btn-sm" %></div>
+    </li>
+  <% end %>
+  <% if @waiting.empty? %><li class="row-empty">No one is waiting.</li><% end %>
+</ol>

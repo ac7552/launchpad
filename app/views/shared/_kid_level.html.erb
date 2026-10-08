@@ -1,0 +1,12 @@
+<%# locals: (stage:, passed:, current: true) %>
+<section class="level" aria-labelledby="level-title">
+  <div class="level-head">
+    <span class="level-emoji" aria-hidden="true"><%= stage.emoji %></span>
+    <div>
+      <p class="label">Level <%= stage.position %><%= " · You are here" if current %></p>
+      <h2 id="level-title"><%= stage.kid_name %></h2>
+    </div>
+  </div>
+
+  <%= render "shared/kid_level_body", stage:, passed:, current: %>
+</section>

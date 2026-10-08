@@ -1,0 +1,77 @@
+<% content_for :title, @project.title %>
+<% content_for :main_class, "editor-page" %>
+<% content_for :head do %><meta name="turbo-cache-control" content="no-cache"><% end %>
+<% mode = @project.editor_mode %>
+<div class="editor"
+     data-controller="editor"
+     data-editor-mode-value="<%= mode %>"
+     data-editor-save-url-value="<%= project_path(@project, format: :json) %>"
+     data-editor-blocks-value="<%= @project.blocks_json %>"
+     data-editor-wasm-url-value="/vendor/ruby-wasm-2.10.1/ruby.wasm">
+
+  <div class="editor-bar">
+    <div class="editor-title">
+      <%= link_to "←", projects_path, class: "btn btn-quiet back-btn", title: "My projects", aria: { label: "Back to my projects" } %>
+      <h1><%= @project.title %></h1>
+      <span class="badge"><%= editor_label(mode) %></span>
+      <span class="save-state" data-editor-target="saveState">Saved</span>
+    </div>
+    <div class="editor-actions">
+      <% if mode == "ruby" && @project.stage.editor.in?(%w[blocks split]) %>
+        <%= button_to "🧩 Blocks", back_to_blocks_project_path(@project), class: "btn btn-quiet",
+              form: { data: { turbo_confirm: "Go back to blocks? Your Ruby changes will go away." } } %>
+      <% end %>
+      <button type="button" class="btn btn-stop" data-action="editor#stop" data-editor-target="stopButton" disabled>■ Stop</button>
+      <button type="button" class="btn btn-go btn-lg" data-action="editor#run" data-editor-target="runButton">▶ Run</button>
+    </div>
+  </div>
+
+  <% if @project.needs_hand_edit? %>
+    <p class="banner banner-warn" data-editor-target="handEditBanner">✋ The coach helped with this code. Change at least one thing to make it yours!</p>
+  <% end %>
+  <% if mode == "ruby" && @project.stage.editor.in?(%w[blocks split]) %>
+    <p class="banner">💎 You're in Ruby mode. Your blocks are paused.</p>
+  <% end %>
+
+  <div class="editor-grid editor-<%= mode %>">
+    <div class="code-col">
+      <% if mode.in?(%w[blocks split]) %>
+        <section class="pane pane-blocks">
+          <header class="pane-head">[ Blocks ]</header>
+          <div class="blockly-host" data-editor-target="blocks"><p class="loading">Loading blocks…</p></div>
+        </section>
+      <% end %>
+
+      <section class="pane pane-ruby <%= 'is-peek' if mode == 'blocks' %>">
+        <header class="pane-head">
+          [ Ruby ]
+          <% if mode == "blocks" %><span class="muted small">— your blocks, written in Ruby</span>
+          <% elsif mode == "split" %><span class="muted small">— type here to switch to Ruby</span><% end %>
+        </header>
+        <div class="code-editor">
+          <pre class="gutter" data-editor-target="gutter" aria-hidden="true">1</pre>
+          <textarea data-editor-target="ruby" data-action="input->editor#rubyEdited keydown->editor#rubyKeydown scroll->editor#syncGutter click->editor#trackLine keyup->editor#trackLine"
+                    spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Ruby code"
+                    <%= "readonly" if mode == "blocks" %>><%= @project.ruby_source %></textarea>
+        </div>
+      </section>
+
+      <% if mode.in?(%w[ruby_first ruby]) %>
+        <details class="pane cheatsheet">
+          <summary>📖 Cheat sheet</summary>
+          <pre class="code"><%= Ai::Prompts::SPRITE_API %></pre>
+        </details>
+      <% end %>
+    </div>
+
+    <div class="side-col">
+      <section class="pane pane-stage">
+        <header class="pane-head">[ Stage ] <span class="muted small" data-editor-target="runtimeState">Getting ready…</span></header>
+        <canvas width="480" height="360" data-editor-target="canvas" aria-label="Sprite stage"></canvas>
+        <pre class="console" data-editor-target="console" aria-live="polite"></pre>
+      </section>
+
+      <%= render "projects/ai_panel", project: @project, modes: @modes, policy: @policy, interactions: @interactions, session: @session %>
+    </div>
+  </div>
+</div>

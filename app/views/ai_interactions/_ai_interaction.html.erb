@@ -1,0 +1,33 @@
+<%# locals: (ai_interaction:) %>
+<% i = ai_interaction %>
+<article class="ai-item ai-<%= i.status %>" id="<%= dom_id(i) %>">
+  <div class="ai-ask">
+    <span class="mode-tag"><%= mode_label(i.mode) %></span>
+    <p><%= i.prompt %></p>
+  </div>
+  <div class="ai-reply">
+    <% case i.status %>
+    <% when "pending" %>
+      <p class="muted"><span class="dots" aria-hidden="true"></span> Thinking…</p>
+    <% when "held" %>
+      <p class="muted">⏳ Your teacher is checking this answer. It'll show up here when it's ready.</p>
+    <% else %>
+      <%= coach_text(i.response_text) %>
+      <% if i.proposed_code.present? %>
+        <div class="proposal">
+          <p class="proposal-head">Coach's code <span class="muted small">— read it before you accept</span></p>
+          <pre class="code"><code><%= i.proposed_code %></code></pre>
+          <% if i.open_proposal? %>
+            <div class="row">
+              <%= button_to "Put it in my project", accept_ai_interaction_path(i), class: "btn btn-primary btn-sm",
+                    form: { data: { action: "submit->editor#saveBeforeSubmit", turbo_confirm: "This replaces the code in your project. You can still change it after." } } %>
+              <%= button_to "No thanks", reject_ai_interaction_path(i), class: "btn btn-quiet btn-sm" %>
+            </div>
+          <% else %>
+            <p class="small muted"><%= i.proposal_state == "accepted" ? "✓ Added to your project" : "Skipped" %></p>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</article>

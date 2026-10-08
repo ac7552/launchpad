@@ -1,0 +1,22 @@
+<% content_for :title, "New project" %>
+<div class="narrow">
+  <div class="kid-hello">
+    <span class="brand-mark big" aria-hidden="true">✨</span>
+    <h1>New project</h1>
+  </div>
+  <%= form_with model: @project, class: "stack" do |form| %>
+    <% if @project.errors.any? %>
+      <p class="flash flash-alert"><%= @project.errors.full_messages.to_sentence %></p>
+    <% end %>
+    <label class="field">
+      <span>Name it</span>
+      <%= form.text_field :title, required: true, maxlength: 80, placeholder: "Rocket to the moon", autofocus: true %>
+    </label>
+    <label class="field">
+      <span>What will it do? <span class="muted small">(you can skip this)</span></span>
+      <%= form.text_area :spec, rows: 3, placeholder: "The rocket flies up and says Blast off!" %>
+    </label>
+    <%= form.submit "Let's make it", class: "btn btn-primary btn-lg btn-block" %>
+    <%= link_to "Cancel", projects_path, class: "btn btn-quiet btn-block" %>
+  <% end %>
+</div>

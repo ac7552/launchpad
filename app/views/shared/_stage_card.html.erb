@@ -1,0 +1,25 @@
+<%# locals: (stage:, current: false, passed: nil) %>
+<article class="stage-card <%= 'is-current' if current %>">
+  <header class="stage-head">
+    <span class="grade-pill">Grade <%= stage.grades %></span>
+    <h3><%= stage.name %></h3>
+    <% if current %><span class="badge badge-current">You are here</span><% end %>
+  </header>
+  <dl class="three-details">
+    <div class="detail detail-coding"><dt>Coding</dt><dd><%= stage.coding_focus %></dd></div>
+    <div class="detail detail-ai"><dt>AI</dt><dd><%= stage.ai_focus %></dd></div>
+    <div class="detail detail-computer"><dt>Computer skills</dt><dd><%= stage.computer_focus %></dd></div>
+  </dl>
+  <p class="stage-project"><strong>Project:</strong> <%= stage.project_summary %></p>
+  <% if passed %>
+    <ul class="milestones">
+      <% stage.milestones.each do |m| %>
+        <li class="<%= 'done' if passed.include?(m.id) %>">
+          <span class="check" aria-hidden="true"><%= passed.include?(m.id) ? "✓" : "" %></span>
+          <span class="cat cat-<%= m.category %>"><%= category_label(m.category) %></span>
+          <%= m.description %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</article>

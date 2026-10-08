@@ -1,0 +1,12 @@
+<% content_for :title, "Privacy" %>
+<div class="home privacy-page">
+  <header class="home-head">
+    <p class="label">[ Version <%= Launchpad::Privacy::NOTICE_VERSION %> ]</p>
+    <h1>Privacy</h1>
+    <p class="lede">Launchpad is made for kids. Kids under 13 can't use it until a parent says yes and we check it's really them.</p>
+  </header>
+  <% if !Launchpad::Privacy.operator_configured? && (Rails.env.development? || current_user&.staff?) %>
+    <p class="flash flash-alert">Before real families use Launchpad: set LAUNCHPAD_OPERATOR_NAME, _ADDRESS, _EMAIL, and _PHONE, and have a lawyer review this page.</p>
+  <% end %>
+  <%= render "shared/privacy_notice" %>
+</div>

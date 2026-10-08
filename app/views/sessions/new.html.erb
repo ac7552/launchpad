@@ -1,0 +1,16 @@
+<% content_for :title, "Sign in" %>
+<div class="signin">
+  <div class="signin-card">
+    <div class="signin-brand">
+      <%= brand_mark(size: 88) %>
+      <h1>launchpad</h1>
+    </div>
+    <p class="tagline">Code it. Build it. Launch it.</p>
+    <%= form_with url: session_path, class: "stack" do |form| %>
+      <%= form.text_field :username, required: true, autofocus: true, autocomplete: "username", value: params[:username], placeholder: "Username", aria: { label: "Username" } %>
+      <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72, placeholder: "Password", aria: { label: "Password" } %>
+      <%= form.submit "Let's go", class: "btn btn-primary btn-lg btn-block" %>
+    <% end %>
+    <p class="muted small" style="margin-top: 18px">Your teacher gives you your username and password.<br><%= link_to "Privacy", privacy_path %></p>
+  </div>
+</div>

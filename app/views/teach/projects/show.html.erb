@@ -1,0 +1,30 @@
+<% content_for :title, @project.title %>
+<section class="hero">
+  <div>
+    <p class="eyebrow"><%= link_to @project.student.name, teach_student_path(@project.student) %> · <%= @project.stage.name %></p>
+    <h1><%= @project.title %></h1>
+    <% if @project.spec.present? %><p class="muted">Spec: <%= @project.spec %></p><% end %>
+  </div>
+  <div class="authorship-summary">
+    <span class="share-bar big"><span style="width: <%= @project.kid_share %>%"></span></span>
+    <p class="small"><strong><%= @project.kid_share %>%</strong> written by the student · <%= @project.hand_edits_after_ai %> edits after AI code</p>
+  </div>
+</section>
+
+<div class="two-col">
+  <section>
+    <h2>Current code <span class="muted small">(highlighted lines came from the coach)</span></h2>
+    <pre class="code authored"><% @project.ruby_source.lines.each_with_index do |line, i| %><span class="line <%= 'by-ai' if @project.authorship[i] == 'ai' %>"><%= line.chomp.presence || " " %></span>
+<% end %></pre>
+  </section>
+  <section>
+    <h2>AI requests</h2>
+    <%= render partial: "teach/reviews/interaction_row", collection: @interactions.reverse, as: :interaction %>
+    <h2>History</h2>
+    <ol class="history">
+      <% @versions.first(30).each do |v| %>
+        <li><span class="badge badge-<%= v.author %>"><%= v.author == "ai" ? "Coach" : "Student" %></span> <%= v.created_at.to_fs(:short) %> · <%= pluralize(v.ruby_source.lines.count, "line") %></li>
+      <% end %>
+    </ol>
+  </section>
+</div>

@@ -1,0 +1,16 @@
+<%# locals: (student:, stages:, current:, selected:) %>
+<% start = Stage.for_grade(student.grade) %>
+<ol class="path" aria-label="Your levels">
+  <% stages.each do |stage| %>
+    <% state = stage.position < current.position ? "done" : (stage == current ? "current" : "locked") %>
+    <li>
+      <% if stage == current %><span class="here-flag">You are here</span><% end %>
+      <%= link_to curriculum_path(level: stage.key, anchor: "level-#{stage.key}"), class: "node is-#{state}", aria: { label: "Level #{stage.position}: #{stage.kid_name}#{' (done)' if state == 'done'}" } do %>
+        <span aria-hidden="true"><%= state == "locked" ? "🔒" : stage.emoji %></span>
+        <% if state == "done" && stage.position >= start.position %><span class="node-check" aria-hidden="true">✓</span><% end %>
+      <% end %>
+      <span class="node-label">Level <%= stage.position %></span>
+      <span class="node-name <%= 'muted' unless stage == selected %>"><%= stage.kid_name %></span>
+    </li>
+  <% end %>
+</ol>

@@ -1,0 +1,49 @@
+<%# locals: (project:, modes:, policy:, interactions:, session:) %>
+<section class="pane pane-ai" id="ai_panel">
+  <header class="pane-head coach-head">
+    <% if policy.nil? || policy.red? || !current_user.ai_sharing_allowed? %>
+      <span class="coach-title">💡 Hints</span>
+    <% else %>
+      <span class="coach-title">🤖 AI coach <span class="muted small"><%= "(demo)" unless Ai.live? %></span></span>
+      <details class="ai-about">
+        <summary>What is this?</summary>
+        <p>This coach is an AI. It's a computer program, not a person. It can be wrong, so test its hints! Your teacher sees everything.</p>
+      </details>
+    <% end %>
+  </header>
+  <%= turbo_stream_from project, :ai %>
+
+  <% if policy %>
+    <%= render "help_sessions/coach", project:, session: %>
+  <% else %>
+    <p class="muted small coach-guided">Help isn't set up for this project. Ask your teacher.</p>
+  <% end %>
+
+  <% if modes.any? %>
+    <details class="typed-questions" <%= "open" if interactions.any? %>>
+      <summary>✏️ Ask your own question</summary>
+      <div class="ai-log" id="ai_log">
+        <%= render partial: "ai_interactions/ai_interaction", collection: interactions %>
+      </div>
+      <%= form_with url: project_ai_interactions_path(project), class: "ai-form",
+            data: { editor_target: "aiForm", action: "submit->editor#prepareAiForm turbo:submit-end->editor#aiSubmitted" } do |form| %>
+        <%= hidden_field_tag :ruby_source, nil, data: { editor_target: "aiSource" } %>
+        <%= hidden_field_tag :blocks_json, nil, data: { editor_target: "aiBlocks" } %>
+        <div class="mode-chips" role="radiogroup" aria-label="Kind of help">
+          <% modes.each do |mode| %>
+            <label class="chip">
+              <%= radio_button_tag :mode, mode, mode == modes.first, data: { action: "editor#aiModeChanged", placeholder: Ai::MODE_PROMPTS[mode] } %>
+              <span><%= mode_label(mode) %></span>
+            </label>
+          <% end %>
+        </div>
+        <%= text_area_tag :prompt, nil, rows: 3, maxlength: 1000, required: true, placeholder: Ai::MODE_PROMPTS[modes.first],
+              data: { editor_target: "aiPrompt" } %>
+        <div class="row between">
+          <span class="muted small"><%= policy.review_required? ? "Your teacher checks answers before you see them." : "Your teacher can see what you ask." %></span>
+          <%= form.submit "Ask", class: "btn btn-primary btn-sm" %>
+        </div>
+      <% end %>
+    </details>
+  <% end %>
+</section>

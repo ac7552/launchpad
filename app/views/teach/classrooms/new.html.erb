@@ -1,0 +1,9 @@
+<% content_for :title, "New class" %>
+<div class="narrow">
+  <h1>New class</h1>
+  <%= form_with model: [:teach, @classroom], class: "stack card" do |form| %>
+    <% if @classroom.errors.any? %><p class="flash flash-alert"><%= @classroom.errors.full_messages.to_sentence %></p><% end %>
+    <label class="field"><span>Class name</span><%= form.text_field :name, required: true, autofocus: true, placeholder: "Room 12 — Grades 4–6" %></label>
+    <div class="row"><%= form.submit "Create class", class: "btn btn-primary" %><%= link_to "Cancel", teach_classrooms_path, class: "btn btn-quiet" %></div>
+  <% end %>
+</div>

@@ -1,0 +1,49 @@
+<% content_for :title, "Curriculum" %>
+<div class="home">
+  <header class="home-head">
+    <p class="label">[ <%= format("%02d", @stages.size) %> ] levels · grades 4–12</p>
+    <h1>Curriculum</h1>
+  </header>
+
+  <ul class="principles">
+    <li><span class="principle-icon" aria-hidden="true">💻</span><strong>Coding first</strong><span>About two thirds of the time.</span></li>
+    <li><span class="principle-icon" aria-hidden="true">🤖</span><strong>AI with a teacher</strong><span>No chatbot under 13.</span></li>
+    <li><span class="principle-icon" aria-hidden="true">⭐</span><strong>Move up by goals</strong><span>Not just by grade.</span></li>
+  </ul>
+
+  <div class="level-list">
+    <% @stages.each do |stage| %>
+      <details class="level-row" id="level-<%= stage.key %>" <%= "open" if params[:level] == stage.key %>>
+        <summary>
+          <span class="mini-node is-current" aria-hidden="true"><%= stage.emoji %></span>
+          <span class="level-row-text">
+            <span class="label">Level <%= stage.position %> · Grade <%= stage.grades %></span>
+            <span class="level-row-name"><%= stage.kid_name %></span>
+          </span>
+          <span class="level-row-status"><span class="pill"><%= stage.tool %></span></span>
+          <span class="chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="level-row-body">
+          <div class="three-cols">
+            <div class="col col-coding"><p class="label">Code</p><p class="col-kid"><%= stage.kid_coding %></p><p class="muted small"><%= stage.coding_focus %></p></div>
+            <div class="col col-ai"><p class="label">AI</p><p class="col-kid"><%= stage.kid_ai %></p><p class="muted small"><%= stage.ai_focus %></p></div>
+            <div class="col col-computer"><p class="label">Computer</p><p class="col-kid"><%= stage.kid_computer %></p><p class="muted small"><%= stage.computer_focus %></p></div>
+          </div>
+          <p class="make"><span class="make-icon" aria-hidden="true">🎮</span><span><span class="label">Make</span><br><%= stage.kid_project %></span></p>
+          <h3>Goals</h3>
+          <ol class="goal-list">
+            <% stage.milestones.each do |m| %>
+              <li><span class="cat cat-<%= m.category %>"><%= { "coding" => "Code", "ai" => "AI", "computer" => "Computer" }[m.category] %></span><%= m.description %></li>
+            <% end %>
+          </ol>
+        </div>
+      </details>
+    <% end %>
+  </div>
+
+  <ul class="rule-strip" aria-label="Rules at every level">
+    <li><strong>Explain it</strong> or it doesn't count.</li>
+    <li><strong>One hand edit</strong> in every project.</li>
+    <li><strong>AI-free challenges</strong> every week (red light).</li>
+  </ul>
+</div>

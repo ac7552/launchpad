@@ -1,0 +1,57 @@
+<%# locals: (help_session:) %>
+<% s = help_session %>
+<% steps = s.steps.to_a %>
+<article class="help-session" id="<%= dom_id(s) %>">
+  <header class="hs-head">
+    <span class="mode-tag"><%= s.card_info[:emoji] %> <%= s.card_info[:label] %></span>
+    <% if s.line_number %><span class="muted small">line <%= s.line_number %></span><% end %>
+  </header>
+
+  <% steps.each do |step| %>
+    <div class="hs-step">
+      <% case step.status %>
+      <% when "pending" %>
+        <p class="bubble coach muted"><span class="dots" aria-hidden="true"></span> Thinking…</p>
+      <% when "held" %>
+        <p class="bubble coach muted">⏳ Your teacher is checking this hint.</p>
+      <% else %>
+        <div class="bubble coach <%= 'teacher' if step.step_kind == 'teacher' %>">
+          <%= coach_text(step.response_text) %>
+          <% if step.line_ref %>
+            <button type="button" class="line-chip" data-action="editor#highlightLine" data-line="<%= step.line_ref %>">👉 Line <%= step.line_ref %></button>
+          <% end %>
+        </div>
+      <% end %>
+      <% if step.kid_choice %><p class="bubble kid"><%= step.kid_choice %></p><% end %>
+    </div>
+  <% end %>
+
+  <% current = steps.last %>
+  <% if s.open? && current&.delivered? %>
+    <div class="hs-actions">
+      <% if current.level == 1 %>
+        <% Array(current.choices).each do |choice| %>
+          <%= button_to choice, respond_help_session_path(s), params: { choice: }, class: "btn btn-choice btn-sm" %>
+        <% end %>
+      <% else %>
+        <%= button_to "#{HelpSession::WORKED} 🎉", respond_help_session_path(s), params: { choice: HelpSession::WORKED }, class: "btn btn-go btn-sm" %>
+        <% wait = s.seconds_until_next_hint %>
+        <span data-controller="countdown" data-countdown-seconds-value="<%= wait %>">
+          <%= button_to HelpSession::STUCK, respond_help_session_path(s), params: { choice: HelpSession::STUCK }, class: "btn btn-quiet btn-sm",
+                disabled: wait.positive?, data: { countdown_target: "button" } %>
+          <span class="muted small" data-countdown-target="label"><%= "Try it first · #{wait}" if wait.positive? %></span>
+        </span>
+      <% end %>
+    </div>
+  <% elsif s.solved? %>
+    <p class="hs-done">🎉 You did it!</p>
+  <% elsif s.escalated? %>
+    <p class="hs-done">🙋 Your teacher is coming to help.</p>
+  <% elsif s.resolved? %>
+    <p class="hs-done">✅ Your teacher helped.</p>
+  <% end %>
+
+  <% if s.open? || s.escalated? %>
+    <%= button_to "Ask something else", abandon_help_session_path(s), class: "btn btn-quiet btn-sm hs-other" %>
+  <% end %>
+</article>

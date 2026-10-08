@@ -1,0 +1,9 @@
+<div class="card stack">
+  <h2>Your child's information</h2>
+  <div class="row">
+    <%= link_to "Download everything (JSON)", parent_export_path(@consent.token), class: "btn btn-quiet", data: { turbo: false } %>
+    <%= button_to "Delete #{@student.first_name}'s account and data", parent_erase_path(@consent.token), method: :delete, class: "btn btn-stop",
+          form: { data: { turbo_confirm: "This permanently deletes #{@student.first_name}'s account, projects, and history. It can't be undone." } } %>
+  </div>
+  <p class="muted small">Questions? <%= Launchpad::Privacy.operator[:email] %> · <%= Launchpad::Privacy.operator[:phone] %></p>
+</div>

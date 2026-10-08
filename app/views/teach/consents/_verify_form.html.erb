@@ -1,0 +1,7 @@
+<%# locals: (consent:) %>
+<%= form_with url: verify_teach_student_consent_path(consent.student), class: "verify-inline" do %>
+  <%= select_tag :verification_method, options_for_select(Launchpad::Privacy::VERIFICATION_METHODS.invert), include_blank: "How did you check?", required: true, aria: { label: "How you confirmed the parent" } %>
+  <label class="toggle"><%= check_box_tag :attest, "1", false, required: true, id: "attest_#{consent.id}" %>
+    <span>It's really <%= consent.student.first_name %>'s parent, and they signed for <%= consent.ai_consent? ? "Launchpad and the AI coach" : "Launchpad only" %>.</span></label>
+  <%= submit_tag "Verify", class: "btn btn-primary" %>
+<% end %>

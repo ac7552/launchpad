@@ -1,0 +1,17 @@
+<%# locals: (interaction:) %>
+<details class="log-row">
+  <summary>
+    <%= status_badge(interaction) %>
+    <span class="mode-tag"><%= interaction.guided? ? "Guided · L#{interaction.level}" : mode_label(interaction.mode) %></span>
+    <span class="log-prompt"><%= interaction.prompt.truncate(90) %></span>
+    <span class="muted small"><%= interaction.student.first_name %> · <%= time_ago_in_words(interaction.created_at) %> ago</span>
+  </summary>
+  <div class="log-body">
+    <% if interaction.flag_reason.present? %><p class="flag-note <%= interaction.flag_severity %>"><%= interaction.flag_reason %></p><% end %>
+    <%= coach_text(interaction.response_text) %>
+    <% if interaction.choices.present? %><p class="small muted">Choices: <%= interaction.choices.join(" · ") %></p><% end %>
+    <% if interaction.kid_choice %><p class="small"><strong>Student pressed:</strong> <%= interaction.kid_choice %></p><% end %>
+    <% if interaction.proposed_code.present? %><pre class="code"><code><%= interaction.proposed_code %></code></pre><p class="small muted">Proposal: <%= interaction.proposal_state %></p><% end %>
+    <p class="small muted"><%= interaction.model %><% if interaction.input_tokens.to_i.positive? %> · <%= interaction.input_tokens %> in / <%= interaction.output_tokens %> out tokens<% end %><% if interaction.reviewed_by %> · reviewed by <%= interaction.reviewed_by.name %><% end %></p>
+  </div>
+</details>

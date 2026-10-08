@@ -1,0 +1,69 @@
+<% content_for :title, "Review queue" %>
+<section class="hero">
+  <div>
+    <p class="eyebrow">Teacher</p>
+    <h1>Review queue</h1>
+    <p class="muted">Held answers wait for you before students see them. Flagged messages already showed the student a safe reply; mark them reviewed once you've followed up.</p>
+  </div>
+</section>
+
+<% if @help_needed.any? %>
+  <h2>🙋 Asked for your help</h2>
+  <div class="stack">
+    <% @help_needed.each do |hs| %>
+      <article class="card review-card">
+        <header class="row between">
+          <div>
+            <strong><%= link_to hs.student.name, teach_student_path(hs.student) %></strong>
+            <span class="muted small">· <%= link_to hs.project.title, teach_project_path(hs.project) %> · <%= time_ago_in_words(hs.updated_at) %> ago</span>
+          </div>
+          <span class="badge badge-held">Needs you</span>
+        </header>
+        <p class="ask"><strong>Card:</strong> <%= hs.description %></p>
+        <% if hs.error_text.present? %><p class="small"><strong>Error:</strong> <code><%= hs.error_text %></code></p><% end %>
+        <ol class="ladder">
+          <% hs.steps.each do |step| %>
+            <li><span class="muted small">Level <%= step.level %> (<%= step.from_hint_bank? ? "hint bank" : step.step_kind %>):</span> <%= step.response_text %><% if step.kid_choice %> → <em><%= step.kid_choice %></em><% end %></li>
+          <% end %>
+        </ol>
+        <%= button_to "Mark helped", resolve_teach_help_session_path(hs), class: "btn btn-primary btn-sm" %>
+      </article>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @queue.empty? && @help_needed.empty? %>
+  <div class="empty"><p>🎉 Nothing to review.</p></div>
+<% end %>
+<% if @queue.any? %><h2>AI answers to check</h2><% end %>
+
+<div class="stack">
+  <% @queue.each do |i| %>
+    <article class="card review-card <%= 'is-urgent' if i.flag_severity == 'urgent' %>">
+      <header class="row between">
+        <div>
+          <strong><%= link_to i.student.name, teach_student_path(i.student) %></strong>
+          <span class="muted small">· <%= link_to i.project.title, teach_project_path(i.project) %> · <%= mode_label(i.mode) %> · <%= time_ago_in_words(i.created_at) %> ago</span>
+        </div>
+        <%= status_badge(i) %>
+      </header>
+      <% if i.flag_reason.present? %><p class="flag-note <%= i.flag_severity %>"><%= i.flag_severity == "urgent" ? "⚠️ Urgent: " : "Flag: " %><%= i.flag_reason %></p><% end %>
+      <p class="ask"><strong><%= i.guided? ? "Card (level #{i.level}):" : "Student asked:" %></strong> <%= i.prompt %></p>
+      <div class="reply"><%= coach_text(i.response_text) %></div>
+      <% if i.proposed_code.present? %><pre class="code"><code><%= i.proposed_code %></code></pre><% end %>
+      <div class="row">
+        <% if i.held? %>
+          <%= button_to "Send to student", approve_teach_review_path(i), class: "btn btn-primary btn-sm" %>
+          <%= button_to "Don't send", deny_teach_review_path(i), class: "btn btn-quiet btn-sm" %>
+        <% else %>
+          <%= button_to "Mark reviewed", dismiss_teach_review_path(i), class: "btn btn-primary btn-sm" %>
+        <% end %>
+      </div>
+    </article>
+  <% end %>
+</div>
+
+<% if @recently_reviewed.any? %>
+  <h2>Recently reviewed</h2>
+  <%= render partial: "teach/reviews/interaction_row", collection: @recently_reviewed, as: :interaction %>
+<% end %>

@@ -1,0 +1,63 @@
+<%# locals: (child: "your child") %>
+<% op = Launchpad::Privacy.operator %>
+<div class="notice">
+  <section class="notice-row">
+    <h2 class="label">Who runs it</h2>
+    <div><p><%= op[:name] %></p><p class="muted"><%= op[:address] %><br><%= op[:email] %> · <%= op[:phone] %></p></div>
+  </section>
+
+  <section class="notice-row">
+    <h2 class="label">What we keep</h2>
+    <ul class="ticks">
+      <li>First name and last initial</li>
+      <li>Username, password (locked), grade, birth year</li>
+      <li>The projects <%= child %> makes</li>
+      <li>Which help cards they tap, and the hints they get</li>
+      <li>Goals their teacher checks off</li>
+      <li>Sign-in times, IP address, and browser, to keep accounts safe</li>
+    </ul>
+  </section>
+
+  <section class="notice-row">
+    <h2 class="label">What we never do</h2>
+    <ul class="crosses">
+      <li>Ask kids for email, photos, voice, or location</li>
+      <li>Let kids under 13 type to the AI</li>
+      <li>Show ads, or sell or rent anyone's information</li>
+    </ul>
+  </section>
+
+  <section class="notice-row">
+    <h2 class="label">Who sees it</h2>
+    <p><%= child.capitalize %>'s teacher and program staff. We use it only to run the coding program.</p>
+  </section>
+
+  <section class="notice-row notice-ai">
+    <h2 class="label">AI coach</h2>
+    <div>
+      <p><strong>Separate permission. You can say no.</strong></p>
+      <p>If you say yes, we send <%= Launchpad::Privacy::AI_PROVIDER %> the project's code (names removed) and which help buttons <%= child %> pressed. Never their name, username, birth year, or anything they type.</p>
+      <p class="muted">If you say no, <%= child %> gets the same hints, written by people. Nothing goes to Anthropic.</p>
+    </div>
+  </section>
+
+  <section class="notice-row">
+    <h2 class="label">Other companies</h2>
+    <p>Our hosting and email companies store and send data for us. They can't use it for anything else.</p>
+  </section>
+
+  <section class="notice-row">
+    <h2 class="label">How long</h2>
+    <ul class="ticks">
+      <li>No answer to our permission email in <%= Launchpad::Privacy::UNCONSENTED_DAYS %> days: account deleted</li>
+      <li>No sign-ins for <%= Launchpad::Privacy::INACTIVE_DAYS %> days: account deleted</li>
+      <li>AI coach history: deleted after <%= Launchpad::Privacy::AI_LOG_DAYS %> days</li>
+      <li>You ask us to delete it: done right away</li>
+    </ul>
+  </section>
+
+  <section class="notice-row">
+    <h2 class="label">Your rights</h2>
+    <p>See it, download it, turn off the AI coach, or delete everything. Use the link in your permission email, or write to <%= op[:email] %>.</p>
+  </section>
+</div>

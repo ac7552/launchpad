@@ -1,0 +1,68 @@
+<% content_for :title, @classroom.name %>
+<section class="hero">
+  <div>
+    <p class="eyebrow"><%= link_to "Classes", teach_classrooms_path %></p>
+    <h1><%= @classroom.name %></h1>
+  </div>
+  <div class="row">
+    <%= link_to teach_reviews_path, class: "btn #{@review_count.positive? ? 'btn-warn' : 'btn-quiet'}" do %>Review queue · <%= @review_count %><% end %>
+    <%= link_to "＋ Add student", new_teach_classroom_student_path(@classroom), class: "btn btn-primary" %>
+  </div>
+</section>
+
+<div class="two-col">
+  <section>
+    <h2>Students</h2>
+    <table class="table">
+      <thead><tr><th>Student</th><th>Grade</th><th>Stage</th><th>Milestones</th><th>Permission</th><th>AI today</th></tr></thead>
+      <tbody>
+        <% @students.each do |student| %>
+          <% stage = student.current_stage %>
+          <% done = student.skill_checks.count { |c| stage.milestones.map(&:id).include?(c.milestone_id) } %>
+          <tr>
+            <td><%= link_to student.name, teach_student_path(student) %></td>
+            <td><%= student.grade %></td>
+            <td><%= stage.name %></td>
+            <td><span class="meter" title="<%= done %> of <%= stage.milestones.size %>"><span style="width: <%= stage.milestones.empty? ? 0 : (done * 100 / stage.milestones.size) %>%"></span></span> <%= done %>/<%= stage.milestones.size %></td>
+            <td>
+              <% if !student.consent_required? %><span class="muted small">13+</span>
+              <% elsif student.parent_consent&.account_allowed? %><span class="badge badge-delivered">OK<%= " · AI" if student.parent_consent.ai_allowed? %></span>
+              <% else %><span class="badge badge-held"><%= student.parent_consent&.submitted? ? "Verify" : "Waiting" %></span><% end %>
+            </td>
+            <td><%= student.ai_requests_today %>/<%= @policy.daily_limit %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @students.empty? %><p class="muted">No students yet. Add one to get started.</p><% end %>
+
+    <h2>Recent AI activity</h2>
+    <%= render partial: "teach/reviews/interaction_row", collection: @recent, as: :interaction %>
+    <% if @recent.empty? %><p class="muted">No AI requests yet.</p><% end %>
+  </section>
+
+  <section>
+    <h2>AI rules for this class</h2>
+    <%= form_with model: @policy, url: teach_classroom_ai_policy_path(@classroom), method: :patch, class: "card stack" do |form| %>
+      <fieldset class="stack-sm">
+        <legend>Traffic light</legend>
+        <% AiPolicy::LIGHTS.each do |light, info| %>
+          <label class="light-option light-<%= light %>">
+            <%= form.radio_button :light, light %>
+            <span><strong><%= info[:label] %></strong><br><span class="muted small"><%= info[:description] %></span></span>
+          </label>
+        <% end %>
+        <p class="muted small">Students under 13 never type to the AI, whatever the light. Red is right for AI-free challenges, tests, and families who opt out.</p>
+      </fieldset>
+      <fieldset class="stack-sm">
+        <legend>Typed question modes <span class="muted small">(green only, students 13+)</span></legend>
+        <% Stage::AI_MODES.each do |mode| %>
+          <label class="toggle"><%= check_box_tag "ai_policy[allowed_modes][]", mode, @policy.allowed_modes.include?(mode), id: "mode_#{mode}" %> <span><%= mode_label(mode) %></span></label>
+        <% end %>
+      </fieldset>
+      <label class="toggle"><%= form.check_box :review_required %> <span><strong>Check AI answers before students see them</strong><br><span class="muted small">AI hints and answers wait in your review queue. Written hints from the hint bank are never held.</span></span></label>
+      <label class="field"><span>Help requests per student per day</span><%= form.number_field :daily_limit, min: 0, max: 200 %></label>
+      <%= form.submit "Save AI rules", class: "btn btn-primary" %>
+    <% end %>
+  </section>
+</div>

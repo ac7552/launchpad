@@ -1,0 +1,31 @@
+<%# locals: (project:, session:, notice: nil) %>
+<div id="coach_guided" class="coach-guided">
+  <% if notice.present? %><p class="coach-notice"><%= notice %></p><% end %>
+
+  <% if session %>
+    <%= render "help_sessions/help_session", help_session: session %>
+  <% end %>
+
+  <% if session.nil? || !session.open? %>
+    <div class="cards">
+      <p class="muted small"><%= session ? "Need help with something else?" : "Stuck? Try first. Then pick one:" %></p>
+      <% Ai::Cards.each do |key, card| %>
+        <%= form_with url: project_help_sessions_path(project), class: "card-form",
+              data: { action: "submit->editor#prepareCoachForm" } do %>
+          <%= hidden_field_tag :card, key, id: nil %>
+          <%= hidden_field_tag :line_number, nil, id: nil, data: { coach_field: "line" } %>
+          <%= hidden_field_tag :error_text, nil, id: nil, data: { coach_field: "error" } %>
+          <%= hidden_field_tag :ruby_source, nil, id: nil, data: { coach_field: "source" } %>
+          <%= hidden_field_tag :blocks_json, nil, id: nil, data: { coach_field: "blocks" } %>
+          <button type="submit" class="question-card">
+            <span class="q-emoji" aria-hidden="true"><%= card[:emoji] %></span>
+            <span>
+              <%= card[:label] %>
+              <% if card[:needs_line] %><span class="q-line" data-editor-target="lineLabel">Tap a line in your code first</span><% end %>
+            </span>
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
