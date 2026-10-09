@@ -1,5 +1,6 @@
 class HomeController < ApplicationController
   def show
+    return redirect_to(family_path) if current_user.parent?
     return redirect_to(teach_classrooms_path) if current_user.staff?
 
     @student = current_user

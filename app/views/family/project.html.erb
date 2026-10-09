@@ -1,0 +1,25 @@
+<% content_for :title, @project.title %>
+<header class="page-head">
+  <p class="label"><%= link_to @child.first_name, family_child_path(@child) %> · <%= @project.stage.kid_name %></p>
+  <h1><%= @project.title %></h1>
+  <% if @project.spec.present? %><p class="lede">Plan: <%= @project.spec %></p><% end %>
+</header>
+<div class="two-col">
+  <section>
+    <p class="label">The code (highlighted lines came from the coach)</p>
+    <pre class="code authored"><% @project.ruby_source.lines.each_with_index do |line, i| %><span class="line <%= 'by-ai' if @project.authorship[i] == 'ai' %>"><%= line.chomp.presence || " " %></span>
+<% end %></pre>
+    <p class="small muted"><%= @project.kid_share %>% written by <%= @child.first_name %> · <%= pluralize(@project.versions.count, "save") %></p>
+  </section>
+  <section>
+    <p class="label">Teacher feedback</p>
+    <ol class="rows">
+      <% @reviews.each do |r| %>
+        <li class="row-item"><span class="row-num"><%= r.returned_at.to_date.to_fs(:short) %></span>
+          <div><p class="row-meta" style="margin: 0"><% ProjectReview::CRITERIA.each do |key, c| %><%= c[:name] %> <%= stars(r.public_send(key)) %>&nbsp;&nbsp;<% end %></p><p style="margin: 6px 0 0"><%= r.feedback %></p></div>
+        </li>
+      <% end %>
+      <% if @reviews.empty? %><li class="row-empty">Not graded yet.</li><% end %>
+    </ol>
+  </section>
+</div>

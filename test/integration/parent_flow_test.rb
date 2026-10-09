@@ -95,6 +95,6 @@ class ParentFlowTest < ActionDispatch::IntegrationTest
 
     sign_in @teacher
     get privacy_path
-    assert_select ".topbar .menu-toggle"
+    assert_select ".topbar .round-link"
   end
 end

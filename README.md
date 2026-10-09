@@ -25,7 +25,8 @@ bin/setup            # installs gems, prepares the database, seeds the curriculu
 bin/rails server -p 3100
 ```
 
-Dev accounts and their password are in `db/seeds.rb` (teacher `ms.rivera`; students `maya` (4), `jalen` (5), `priya` (6), `theo` (7), `nia` (9, 13+)).
+Dev accounts and their password are in `db/seeds.rb` (teacher `ms.rivera`; students `maya` (4), `jalen` (5), `priya` (6), `theo` (7), `nia` (9, 13+); parent `maya.parent@example.com`).
+After running a migration, restart the dev server so it sees new columns.
 
 AI: set `ANTHROPIC_API_KEY` (or `anthropic.api_key` in credentials) to use Claude. Without a key the
 coach runs in **demo mode** with canned replies, so every flow still works offline.
@@ -53,6 +54,17 @@ bin/rails test       # models, AI gate/tutor, teacher flows, access rules
 `LAUNCHPAD_HOST`, `LAUNCHPAD_MAIL_FROM`, and SMTP settings; have a lawyer review the notice and consent flow;
 write the information security program the COPPA rule requires; and confirm Anthropic's current terms
 for products used by minors. In development, emails are written to `tmp/mails`.
+
+## Tiers, grading, parents, and messages
+
+- **Tiers** (Explorers 4–5, Builders 6–8, Launch Crew 9–12) change how Launchpad looks and talks, never what a
+  student may do. Default = grade band; staff change it per student or in bulk on Students (`/teach/students`).
+- **Grading:** students turn in a project; teachers score Coding, Problem solving, and Made it yours (1–4) with
+  feedback (`/teach/grading`). Students see stars and feedback on the project; parents see it in the portal.
+- **Parent portal** (`/family`): parents sign in with their email. Under-13 families get a join link after
+  permission is verified; staff can invite any parent from the student page. Parents see only their own children.
+- **Messages:** one shared conversation per student (student, their parents, their teachers). Everyone reads every
+  message, so no adult messages a child privately. Messages never go to the AI; possible distress is flagged.
 
 ## How it fits together
 

@@ -146,9 +146,10 @@ CURRICULUM.each_with_index do |attrs, i|
   stage.milestones.where("position > ?", attrs[:milestones].size).destroy_all
 end
 
-# Development accounts. These are local test credentials only; change them before any real use.
-if Rails.env.development?
-  dev_password = "launchpad-dev"
+# Development accounts, also used for a public demo (LAUNCHPAD_DEMO=1). A demo takes its password from
+# LAUNCHPAD_DEMO_PASSWORD so the one in this file never works on a public site.
+if Rails.env.development? || ENV["LAUNCHPAD_DEMO"] == "1"
+  dev_password = Rails.env.development? ? "launchpad-dev" : ENV.fetch("LAUNCHPAD_DEMO_PASSWORD")
 
   teacher = User.find_or_initialize_by(username: "ms.rivera")
   teacher.update!(name: "Ms. Rivera", role: "teacher", password: dev_password)
@@ -176,7 +177,30 @@ if Rails.env.development?
     end
   end
 
-  puts "Dev accounts: teacher ms.rivera, students maya (4), jalen (5), nia (9, 13+); priya and theo await parent permission. Password: see db/seeds.rb"
+  # Parents: a guardian record for each family; Maya's parent already has a login (username = their email).
+  User.students.find_each do |kid|
+    consent = kid.parent_consent
+    kid.guardianships.find_or_create_by!(email: consent&.parent_email || "#{kid.username}.parent@example.com") do |g|
+      g.name = consent&.parent_name || "Parent of #{kid.first_name}"
+    end
+  end
+  maya = User.find_by!(username: "maya")
+  maya_parent = User.find_or_initialize_by(username: "maya.parent@example.com")
+  maya_parent.update!(name: "Rosa Lopez", role: "parent", password: dev_password)
+  maya.guardianships.find_by!(email: "maya.parent@example.com").then { |g| g.claim!(maya_parent) unless g.claimed? }
+  thread = MessageThread.for(maya)
+  if thread.messages.none?
+    thread.messages.create!(author: maya, body: "I made the cat go in a square!")
+    thread.messages.create!(author: teacher, body: "Amazing, Maya! Next time, can you make it say something at each corner?")
+    thread.messages.create!(author: maya_parent, body: "She showed me at home. Thank you!")
+  end
+
+  # A turned-in project waiting to be graded.
+  jalen = User.find_by!(username: "jalen")
+  turned_in = jalen.projects.order(:created_at).first || jalen.projects.create!(title: "Rocket square")
+  turned_in.turn_in!(note: "I made it go in a square") if turned_in.reviews.none?
+
+  puts "Dev accounts: teacher ms.rivera, students maya (4), jalen (5), nia (9, 13+); priya and theo await parent permission; parent maya.parent@example.com. Password: see db/seeds.rb"
 end
 
 puts "Seeded #{Stage.count} stages and #{Milestone.count} milestones."

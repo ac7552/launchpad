@@ -1,0 +1,60 @@
+<% content_for :title, @child.first_name %>
+<header class="page-head page-head-row">
+  <div>
+    <p class="label"><%= link_to "Family", family_path %> · Grade <%= @child.grade %></p>
+    <h1><%= @child.name %></h1>
+    <p class="lede">Level <%= @stage.position %>: <%= @stage.kid_name %>. <%= @stage.kid_coding %></p>
+  </div>
+  <div class="row">
+    <%= link_to "Message the teacher", message_thread_path(@child), class: "btn btn-primary" %>
+    <% if @consent %><%= link_to "Privacy & permissions", parent_consent_path(@consent.token), class: "btn btn-quiet" %><% end %>
+  </div>
+</header>
+
+<div class="two-col">
+  <section>
+    <p class="label section-label" style="margin-top: 0">Projects</p>
+    <ol class="rows">
+      <% @projects.each_with_index do |p, i| %>
+        <% graded = p.reviews.select(&:returned?).last %>
+        <li>
+          <%= link_to family_project_path(@child, p), class: "row-item" do %>
+            <span class="row-num"><%= format("%02d", i + 1) %></span>
+            <div>
+              <p class="row-name" style="font-size: 1.25rem"><%= p.title %></p>
+              <p class="row-meta"><%= p.kid_share %>% written by <%= @child.first_name %> · edited <%= time_ago_in_words(p.updated_at).delete_prefix("about ") %> ago<%= " · graded" if graded %><%= " · turned in" if p.reviews.any?(&:submitted?) %></p>
+            </div>
+            <span class="row-aside row-arrow" aria-hidden="true">→</span>
+          <% end %>
+        </li>
+      <% end %>
+      <% if @projects.empty? %><li class="row-empty">No projects yet.</li><% end %>
+    </ol>
+
+    <p class="label section-label">Teacher feedback</p>
+    <ol class="rows">
+      <% @reviews.each do |r| %>
+        <li class="row-item">
+          <span class="row-num"><%= r.returned_at.to_date.to_fs(:short) %></span>
+          <div>
+            <p class="row-name" style="font-size: 1.1rem"><%= r.project.title %></p>
+            <p class="row-meta"><% ProjectReview::CRITERIA.each do |key, c| %><%= c[:name] %> <%= stars(r.public_send(key)) %>&nbsp;&nbsp;<% end %></p>
+            <p style="margin: 6px 0 0"><%= r.feedback %></p>
+          </div>
+        </li>
+      <% end %>
+      <% if @reviews.empty? %><li class="row-empty">No graded work yet.</li><% end %>
+    </ol>
+  </section>
+
+  <aside>
+    <p class="label section-label" style="margin-top: 0">Goals this level · <%= @stage.milestones.count { |m| @passed.include?(m.id) } %> of <%= @stage.milestones.size %></p>
+    <ul class="goals" style="margin-top: 12px">
+      <% @stage.milestones.each do |m| %>
+        <li class="goal <%= 'done' if @passed.include?(m.id) %>"><span class="goal-check" aria-hidden="true"><%= "✓" if @passed.include?(m.id) %></span><span class="goal-text"><%= m.kid_description || m.description %></span></li>
+      <% end %>
+    </ul>
+    <p class="label section-label">Help from the coach</p>
+    <p><%= pluralize(@help_count, "time") %> in the last 30 days. <span class="muted">The coach asks questions and gives hints. It never writes the answer for kids under 13.</span></p>
+  </aside>
+</div>

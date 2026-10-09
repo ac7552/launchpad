@@ -1,68 +1,29 @@
-<%# The Abel-style top bar and full-screen menu, for students and staff. %>
-<% links = if current_user.student?
-     [ [ "Path", root_path, "🗺️" ], [ "Projects", projects_path, "🛠️" ], [ "Levels", curriculum_path, "⭐" ] ]
-   else
-     [ [ "Classes", teach_classrooms_path, nil ], [ "Review queue", teach_reviews_path, nil ], [ "Permission", teach_consents_path, nil ],
-       [ "Curriculum", curriculum_path, nil ], [ "Privacy", privacy_path, nil ] ]
-   end %>
-<header class="topbar" data-controller="menu" data-action="keydown@window->menu#closeOnEscape">
-  <button type="button" class="menu-toggle" data-menu-target="toggle" data-action="menu#open" aria-expanded="false" aria-controls="site-menu">
-    <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
-    <span>Menu</span>
-  </button>
+<%# Top bar: round buttons, like the world itself. The world is the menu (parents get their own home). %>
+<header class="topbar">
+  <% if current_user.parent? %>
+    <%= link_to family_path, class: "round-link #{'is-here' if controller_name == 'family'}", aria: { label: "Home" } do %>
+      <span class="round-btn" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
+      <span class="round-label">Home</span>
+    <% end %>
+  <% else %>
+    <%= link_to root_path, class: "round-link #{'is-here' if current_page?(root_path)}", aria: { label: "Back to the world" } do %>
+      <span class="round-btn" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></svg>
+      </span>
+      <span class="round-label">World</span>
+    <% end %>
+  <% end %>
 
-  <%= link_to root_path, class: "brand", aria: { label: "Launchpad home" } do %><%= brand_mark %><span>launchpad</span><% end %>
+  <%= link_to (current_user.parent? ? family_path : root_path), class: "brand", aria: { label: "Launchpad home" } do %><%= brand_mark %><span>launchpad</span><% end %>
 
   <div class="who">
     <span class="who-name"><%= current_user.student? ? current_user.first_name : current_user.name %></span>
+    <%= link_to messages_path, class: "round-btn msg-btn #{'has-unread' if unread_messages?(current_user)}", aria: { label: "Messages" }, title: "Messages" do %>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>
+    <% end %>
     <span class="avatar" aria-hidden="true"><%= current_user.first_name.first.upcase %></span>
-  </div>
-
-  <div class="menu-panel" id="site-menu" data-menu-target="panel" hidden role="dialog" aria-modal="true" aria-label="Menu">
-    <div class="menu-top">
-      <button type="button" class="menu-toggle" data-action="menu#close"><span class="close-x" aria-hidden="true">✕</span><span>Close</span></button>
-      <span class="brand"><%= brand_mark %><span>launchpad</span></span>
-      <span class="who-name"><%= current_user.student? ? current_user.first_name : current_user.name %></span>
-    </div>
-
-    <div class="menu-body">
-      <nav class="menu-links" aria-label="Main">
-        <% links.each_with_index do |(label, path, icon), i| %>
-          <%= link_to path, class: ("is-active" if current_page?(path)) do %>
-            <span class="menu-num"><%= format("%02d", i + 1) %></span>
-            <span class="menu-word"><%= label %></span>
-            <% if icon %><span class="menu-icon" aria-hidden="true"><%= icon %></span><% end %>
-          <% end %>
-        <% end %>
-      </nav>
-
-      <div class="menu-tiles">
-        <% if current_user.student? %>
-          <% last = current_user.projects.order(updated_at: :desc).first %>
-          <% if last %>
-            <%= link_to last, class: "menu-tile tile-green" do %>
-              <span class="label">Keep building</span><span class="tile-emoji" aria-hidden="true"><%= project_emoji(last) %></span><strong><%= last.title %></strong>
-            <% end %>
-          <% end %>
-          <%= link_to new_project_path, class: "menu-tile tile-blue" do %>
-            <span class="label">Start something</span><span class="tile-emoji" aria-hidden="true">✨</span><strong>New project</strong>
-          <% end %>
-        <% else %>
-          <% waiting = AiInteraction.where(classroom: current_user.taught_classrooms).needs_review.count + HelpSession.where(classroom: current_user.taught_classrooms).needs_teacher.count %>
-          <% verify = ParentConsent.where(student_id: Enrollment.where(classroom: current_user.taught_classrooms).select(:student_id)).awaiting_staff.count %>
-          <%= link_to teach_reviews_path, class: "menu-tile tile-gold" do %>
-            <span class="label">Review queue</span><span class="tile-num"><%= waiting %></span><strong><%= waiting == 1 ? "item needs you" : "items need you" %></strong>
-          <% end %>
-          <%= link_to teach_consents_path, class: "menu-tile tile-blue" do %>
-            <span class="label">Permission</span><span class="tile-num"><%= verify %></span><strong>to verify</strong>
-          <% end %>
-        <% end %>
-      </div>
-    </div>
-
-    <div class="menu-foot">
-      <%= link_to "Privacy", privacy_path %>
-      <%= button_to "Sign out", session_path, method: :delete, class: "menu-signout" %>
-    </div>
+    <%= button_to session_path, method: :delete, class: "round-btn", aria: { label: "Sign out" }, title: "Sign out" do %>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v8M7.5 6.5a7 7 0 1 0 9 0"/></svg>
+    <% end %>
   </div>
 </header>

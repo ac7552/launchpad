@@ -48,3 +48,7 @@ end
 gem "anthropic", "~> 1.76"
 
 gem "json", "~> 2.10"
+
+gem "kamal", "~> 2.12", group: :development, require: false
+
+gem "thruster", "~> 0.1.27", require: false

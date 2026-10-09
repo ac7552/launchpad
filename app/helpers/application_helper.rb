@@ -9,6 +9,20 @@ module ApplicationHelper
     end)
   end
 
+  # True when a message thread this person can see has something new for them.
+  def unread_messages?(user)
+    threads =
+      if user.student? then MessageThread.where(student_id: user.id)
+      elsif user.parent? then MessageThread.where(student_id: user.children.select(:id))
+      else
+        rooms = user.admin? ? Classroom.all : user.taught_classrooms
+        MessageThread.where(student_id: Enrollment.where(classroom: rooms).select(:student_id))
+      end
+    threads.where.not(last_message_at: nil).any? { |t| t.unread_for?(user) }
+  end
+
+  def stars(score) = safe_join(Array.new(4) { |i| tag.span(i < score.to_i ? "★" : "☆", class: (i < score.to_i ? "star on" : "star")) })
+
   # Launchpad's mark: the same green app icon as the browser tab.
   def brand_mark(size: 30)
     tag.img(src: "/icon.svg", alt: "", width: size, height: size, class: "brand-mark")

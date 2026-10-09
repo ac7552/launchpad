@@ -1,0 +1,22 @@
+<% content_for :title, "Messages" %>
+<div class="chat">
+  <header class="page-head" style="margin-bottom: 0">
+    <p class="label"><%= link_to "Messages", messages_path unless current_user.student? %><%= " · " unless current_user.student? %><%= @thread.student.name %></p>
+    <h1 class="script" style="font-size: 3rem"><%= current_user.student? ? "Talk to your teacher" : "#{@thread.student.first_name}'s conversation" %></h1>
+  </header>
+
+  <p class="chat-note">
+    <% if current_user.student? %>
+      Your teacher and your parents can read everything here. Be kind, and never share passwords.
+    <% else %>
+      Everyone here can read every message: <%= @thread.student.first_name %>, their parents, and their teachers. Messages never go to the AI.
+    <% end %>
+  </p>
+
+  <%= turbo_stream_from @thread %>
+  <div class="chat-log" id="messages" data-controller="chat" data-chat-me-value="<%= current_user.id %>">
+    <%= render partial: "messages/message", collection: @messages, as: :message %>
+  </div>
+
+  <%= render "messages/composer", thread: @thread %>
+</div>

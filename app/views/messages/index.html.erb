@@ -1,0 +1,25 @@
+<% content_for :title, "Messages" %>
+<header class="page-head">
+  <p class="label">[ <%= format("%02d", @threads.size) %> ] conversations</p>
+  <h1>Messages</h1>
+  <p class="lede"><%= current_user.parent? ? "One conversation per child, with their teachers." : "One conversation per student. Their parents and teachers all read it." %></p>
+</header>
+
+<ul class="thread-list">
+  <% @threads.each do |t| %>
+    <li>
+      <%= link_to message_thread_path(t.student) do %>
+        <span>
+          <strong><%= t.student.name %></strong>
+          <% if @urgent_ids&.include?(t.id) %><span class="badge badge-flagged">needs a check-in</span><% end %>
+          <br><span class="muted small"><%= t.messages.last&.body&.truncate(80) || "No messages yet." %></span>
+        </span>
+        <span class="row small muted">
+          <% if t.unread_for?(current_user) %><span class="unread-dot" aria-label="New messages"></span><% end %>
+          <%= t.last_message_at ? "#{time_ago_in_words(t.last_message_at).delete_prefix('about ')} ago" : "" %>
+        </span>
+      <% end %>
+    </li>
+  <% end %>
+  <% if @threads.empty? %><li class="row-empty">No messages yet. Open a student and choose Messages to start one.</li><% end %>
+</ul>

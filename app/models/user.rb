@@ -1,5 +1,12 @@
 class User < ApplicationRecord
-  ROLES = %w[student teacher admin].freeze
+  ROLES = %w[student teacher admin parent].freeze
+
+  # Look-and-words tiers. They never change permissions: those follow age and parent consent.
+  TIERS = {
+    "explorer" => { name: "Explorers", grades: 4..5 },
+    "builder" => { name: "Builders", grades: 6..8 },
+    "launch_crew" => { name: "Launch Crew", grades: 9..12 }
+  }.freeze
 
   has_secure_password
   has_many :sessions, dependent: :destroy
@@ -15,6 +22,13 @@ class User < ApplicationRecord
   has_many :ai_interactions, foreign_key: :student_id, dependent: :destroy
   has_many :help_sessions, foreign_key: :student_id, dependent: :destroy
   has_one :parent_consent, foreign_key: :student_id, dependent: :destroy
+  has_many :guardianships, foreign_key: :student_id, dependent: :destroy
+  has_one :message_thread, foreign_key: :student_id, dependent: :destroy
+  has_many :project_reviews, through: :projects
+
+  # Parent side
+  has_many :parent_links, class_name: "Guardianship", foreign_key: :parent_id, dependent: :nullify
+  has_many :children, -> { order(:name) }, through: :parent_links, source: :student
 
   normalizes :username, with: ->(u) { u.strip.downcase }
 
@@ -22,7 +36,10 @@ class User < ApplicationRecord
   before_validation :shorten_student_name, if: :student?
 
   validates :name, presence: true
-  validates :username, presence: true, uniqueness: true, format: { with: /\A[a-z0-9_.\-]+\z/, message: "can use letters, numbers, dots, dashes and underscores" }
+  validates :username, presence: true, uniqueness: true
+  validates :username, format: { with: /\A[a-z0-9_.\-]+\z/, message: "can use letters, numbers, dots, dashes and underscores" }, unless: :parent?
+  validates :username, format: { with: URI::MailTo::EMAIL_REGEXP, message: "must be an email address" }, if: :parent?
+  validates :ui_tier, inclusion: { in: TIERS.keys }, allow_blank: true
   validates :role, inclusion: { in: ROLES }
   validates :grade, inclusion: { in: 4..12 }, if: :student?
   validates :birth_year, presence: true, numericality: { only_integer: true, in: 1990..Date.current.year }, if: :student?
@@ -32,6 +49,13 @@ class User < ApplicationRecord
   ROLES.each { |r| define_method(:"#{r}?") { role == r } }
 
   def staff? = teacher? || admin?
+
+  def self.default_tier_for(grade) = TIERS.find { |_, t| t[:grades].cover?(grade.to_i) }&.first || "explorer"
+
+  # The tier a student sees: a teacher's choice if set, otherwise their grade band's.
+  def tier = student? ? (ui_tier.presence || User.default_tier_for(grade)) : nil
+  def tier_name = TIERS.dig(tier, :name)
+  def tier_overridden? = student? && ui_tier.present? && ui_tier != User.default_tier_for(grade)
 
   def first_name = name.split.first
 

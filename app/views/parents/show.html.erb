@@ -52,6 +52,14 @@
         <li><%= pluralize(@student.skill_checks.count, "milestone") %> passed</li>
       </ul>
     </div>
+    <% g = @student.guardianships.find_by(email: @consent.parent_email) %>
+    <% if g && !g.claimed? %>
+      <div class="card stack-sm">
+        <h2>See <%= @student.first_name %>'s work</h2>
+        <p>Make a parent login to see projects, goals, and teacher feedback, and to message the teacher.</p>
+        <%= link_to "Make my parent login", join_path(g.token), class: "btn btn-primary" %>
+      </div>
+    <% end %>
     <%= render "parents/rights" %>
   <% end %>
 

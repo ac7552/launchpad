@@ -8,17 +8,17 @@
     <%= csp_meta_tag %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
     <%= yield :head %>
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon.png">
-    <meta name="theme-color" content="#58cc02">
+    <meta name="theme-color" content="#F8F3EE">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="<%= 'kid' if current_user&.student? %> <%= content_for(:body_class) %>">
+  <body class="<%= 'kid' if current_user&.student? %> <%= content_for(:body_class) %>" data-tier="<%= current_user&.tier %>">
     <%= render "layouts/nav" if current_user %>
 
     <% if notice.present? || alert.present? %>

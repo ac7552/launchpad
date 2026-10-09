@@ -7,7 +7,8 @@ const ORDER_ATOMIC = 0
 const ORDER_RELATIONAL = 7
 const ORDER_NONE = 99
 
-const MOTION = "#4c97ff", LOOKS = "#9966ff", CONTROL = "#ffab19", OPERATORS = "#59c059", OUTPUT = "#cf63cf"
+// The world's palette: teal, lavender, mustard, sage, coral.
+const MOTION = "#4fa3a5", LOOKS = "#a17fcf", CONTROL = "#e0a33a", OPERATORS = "#6aa84f", OUTPUT = "#e8735a"
 
 const spriteField = { type: "field_dropdown", name: "SPRITE", options: SPRITE_OPTIONS }
 
@@ -99,7 +100,7 @@ function launchpadTheme(Blockly) {
   theme ??= Blockly.Theme.defineTheme("launchpad", {
     base: Blockly.Themes.Classic,
     fontStyle: { family: "Nunito, system-ui, sans-serif", weight: "800", size: 13 },
-    componentStyles: { toolboxBackgroundColour: "#f7f7f7", toolboxForegroundColour: "#3c3c3c", flyoutBackgroundColour: "#ffffff", flyoutOpacity: 1 }
+    componentStyles: { workspaceBackgroundColour: "#fffdf8", toolboxBackgroundColour: "#f1eadf", toolboxForegroundColour: "#3a3a35", flyoutBackgroundColour: "#f8f3ee", flyoutOpacity: 1 }
   })
   return theme
 }

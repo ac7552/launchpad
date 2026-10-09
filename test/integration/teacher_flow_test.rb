@@ -89,7 +89,7 @@ class TeacherFlowTest < ActionDispatch::IntegrationTest
 
   test "students see the path and a tap-to-open list of levels" do
     sign_in @student
-    get root_path
+    get path_path
     assert_select ".path .node", Stage.count
     assert_select ".level h2", @student.current_stage.kid_name
 
@@ -104,5 +104,18 @@ class TeacherFlowTest < ActionDispatch::IntegrationTest
     get curriculum_path
     assert_select "details.level-row", Stage.count
     assert_select ".three-cols", Stage.count
+  end
+
+  test "the world is home, with places that lead to each part of the app" do
+    sign_in @student
+    get root_path
+    assert_select ".spot", 6
+    assert_select "template[data-spot=workshop]"
+    assert_select ".world-strip button", 6
+
+    sign_in @teacher
+    get root_path
+    assert_select ".spot", 6
+    assert_select ".spot-label", text: /Review/
   end
 end

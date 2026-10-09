@@ -1,0 +1,46 @@
+# Kamal deploy for Launchpad, modeled on Curb's. Demo setup: same Droplet as Curb, its own SQLite data,
+# served at launchpadcoder.com with its own Cloudflare origin certificate.
+service: launchpad
+image: launchpad
+
+servers:
+  web:
+    - <%= ENV.fetch("LAUNCHPAD_SERVER", "138.197.142.166") %>
+
+proxy:
+  ssl:
+    certificate_pem: CLOUDFLARE_ORIGIN_CERT
+    private_key_pem: CLOUDFLARE_ORIGIN_KEY
+  forward_headers: true
+  host: <%= ENV.fetch("LAUNCHPAD_HOST", "launchpadcoder.com") %>
+  response_timeout: 60
+
+registry:
+  server: localhost:5555
+
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - ANTHROPIC_API_KEY
+    - LAUNCHPAD_DEMO_PASSWORD
+  clear:
+    SOLID_QUEUE_IN_PUMA: true
+    WEB_CONCURRENCY: 1
+    LAUNCHPAD_HOST: <%= ENV.fetch("LAUNCHPAD_HOST", "launchpadcoder.com") %>
+    LAUNCHPAD_MAIL_FROM: hello@launchpadcoder.com
+    # Demo: seeds the sample teacher, students, and parent on the first boot. Remove before real families use it.
+    LAUNCHPAD_DEMO: "1"
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+
+# The SQLite databases (and everything students make) live in this volume, separate from Curb's data.
+volumes:
+  - "launchpad_storage:/rails/storage"
+
+asset_path: /rails/public/assets
+
+builder:
+  arch: amd64

@@ -1,0 +1,224 @@
+<%# locals: (level: nil) %>
+<%# The Launchpad world: a 3600×1000 flat, faceted tech landscape on warm paper. %>
+<svg class="world-art" viewBox="0 0 3600 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Launchpad world: a workshop, a robot, a hill path, a library, a vault, and a rocket">
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.23  0 0 0 0 0.22  0 0 0 0 0.2  0 0 0 0.09 0"/>
+      <feComposite operator="in" in2="SourceGraphic"/>
+    </filter>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F8F3EE"/>
+      <stop offset="1" stop-color="#F3E9DC"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="3600" height="1000" fill="url(#sky)"/>
+
+  <!-- Sun, in facets -->
+  <g transform="translate(560 170)">
+    <circle r="78" fill="#F2B544"/>
+    <polygon points="0,-78 55,-55 0,0" fill="#F6C566"/>
+    <polygon points="-78,0 -55,55 0,0" fill="#D69A2D" opacity="0.5"/>
+    <polygon points="55,55 0,78 0,0" fill="#D69A2D" opacity="0.35"/>
+  </g>
+
+  <!-- Low-poly clouds -->
+  <g fill="#FFFDF8">
+    <polygon points="140,250 210,205 300,215 350,250 300,280 180,282"/>
+    <polygon points="1260,190 1330,150 1420,160 1480,200 1420,228 1290,226"/>
+    <polygon points="2060,140 2130,100 2230,112 2290,150 2220,178 2090,176"/>
+    <polygon points="3000,220 3070,182 3160,190 3220,226 3150,252 3030,250"/>
+  </g>
+  <g fill="#EDE4D6">
+    <polygon points="180,282 300,280 350,250 260,262"/>
+    <polygon points="1290,226 1420,228 1480,200 1380,212"/>
+    <polygon points="2090,176 2220,178 2290,150 2190,162"/>
+    <polygon points="3030,250 3150,252 3220,226 3120,238"/>
+  </g>
+
+  <!-- Floating pixels and binary, like stars of the computer sky -->
+  <g opacity="0.85">
+    <rect x="760" y="300" width="14" height="14" fill="#E8735A" transform="rotate(18 767 307)"/>
+    <rect x="1560" y="250" width="12" height="12" fill="#4FA3A5" transform="rotate(-12 1566 256)"/>
+    <rect x="1940" y="210" width="16" height="16" fill="#B794DB" transform="rotate(30 1948 218)"/>
+    <rect x="2620" y="280" width="12" height="12" fill="#F2B544" transform="rotate(8 2626 286)"/>
+    <rect x="3480" y="140" width="14" height="14" fill="#E8735A" transform="rotate(-20 3487 147)"/>
+    <rect x="900" y="160" width="10" height="10" fill="#B794DB"/>
+    <rect x="2480" y="160" width="10" height="10" fill="#4FA3A5"/>
+  </g>
+  <g class="world-script" fill="#CFC4B3" font-size="38">
+    <text x="820" y="230" transform="rotate(-6 820 230)">01001100</text>
+    <text x="2440" y="230" transform="rotate(4 2440 230)">print "hi!"</text>
+    <text x="3380" y="270" transform="rotate(-4 3380 270)">3 · 2 · 1</text>
+  </g>
+
+  <!-- Far hills -->
+  <polygon points="0,700 220,600 430,660 700,560 980,650 1250,590 1500,660 1800,540 2100,640 2400,580 2700,650 3000,570 3300,640 3600,590 3600,1000 0,1000" fill="#DCCDF0"/>
+  <polygon points="700,560 980,650 760,640" fill="#CDB9E8"/>
+  <polygon points="1800,540 2100,640 1880,630" fill="#CDB9E8"/>
+  <polygon points="3000,570 3300,640 3080,628" fill="#CDB9E8"/>
+
+  <!-- Mid hills -->
+  <polygon points="0,760 300,700 620,735 900,690 1250,740 1500,700 2200,740 2500,700 2900,745 3250,705 3600,740 3600,1000 0,1000" fill="#B9D3B0"/>
+
+  <!-- The Path hill -->
+  <polygon points="1430,770 1800,330 2180,770" fill="#8FB996"/>
+  <polygon points="1800,330 2180,770 1930,770" fill="#6E9A77"/>
+  <polygon points="1800,330 1600,560 1700,600" fill="#A4C8A0"/>
+  <!-- Winding road up the hill -->
+  <path d="M1500,770 C1700,740 1900,720 1960,680 S1700,620 1720,580 S1920,520 1880,470 S1760,420 1790,380 L1800,345"
+        fill="none" stroke="#F3E9DC" stroke-width="22" stroke-linecap="round"/>
+  <path d="M1500,770 C1700,740 1900,720 1960,680 S1700,620 1720,580 S1920,520 1880,470 S1760,420 1790,380 L1800,345"
+        fill="none" stroke="#D9CDB5" stroke-width="3" stroke-dasharray="10 14" stroke-linecap="round"/>
+  <!-- Level flags along the road: done = gold, now = coral, later = gray -->
+  <% [ [ 1560, 752 ], [ 1760, 728 ], [ 1930, 690 ], [ 1730, 600 ], [ 1890, 500 ], [ 1780, 410 ], [ 1800, 330 ] ].each_with_index do |(fx, fy), i| %>
+    <% n = i + 1 %>
+    <% color = level.nil? ? "#F2B544" : (n < level ? "#F2B544" : (n == level ? "#E8735A" : "#C9C2B5")) %>
+    <g transform="translate(<%= fx %> <%= fy %>)">
+      <line x1="0" y1="0" x2="0" y2="-58" stroke="#3A3A35" stroke-width="4" stroke-linecap="round"/>
+      <polygon points="0,-58 38,-47 0,-34" fill="<%= color %>"/>
+      <% if n == level %><circle r="10" cy="2" fill="#E8735A" class="pulse-dot"/><% end %>
+    </g>
+  <% end %>
+  <text class="world-script" x="1828" y="292" fill="#3A3A35" font-size="34">★</text>
+
+  <!-- Ground -->
+  <polygon points="0,800 600,770 1200,800 1800,775 2400,800 3000,772 3600,800 3600,1000 0,1000" fill="#8FB996"/>
+  <polygon points="0,1000 300,860 650,1000" fill="#7BA884"/>
+  <polygon points="900,1000 1250,880 1500,1000" fill="#7BA884"/>
+  <polygon points="2100,1000 2450,870 2750,1000" fill="#7BA884"/>
+  <polygon points="3150,1000 3420,890 3600,960 3600,1000" fill="#7BA884"/>
+
+  <!-- Circuit traces across the ground, joining every place -->
+  <g fill="none" stroke="#5E8C6A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M60,900 H360 V860 H700 V910 H1050 V870 H1500 V915 H2000 V880 H2350 V915 H2800 V875 H3250 V905 H3560"/>
+    <path d="M240,960 H520 V930 H880" opacity="0.7"/>
+    <path d="M1620,960 H1900 V940 H2200" opacity="0.7"/>
+    <path d="M2900,960 H3200 V935 H3480" opacity="0.7"/>
+  </g>
+  <g fill="#F8F3EE" stroke="#5E8C6A" stroke-width="5">
+    <circle cx="60" cy="900" r="9"/><circle cx="700" cy="860" r="9"/><circle cx="1500" cy="870" r="9"/>
+    <circle cx="2350" cy="880" r="9"/><circle cx="3250" cy="875" r="9"/><circle cx="3560" cy="905" r="9"/>
+    <circle cx="880" cy="930" r="7"/><circle cx="2200" cy="940" r="7"/><circle cx="3480" cy="935" r="7"/>
+  </g>
+
+  <!-- 1 · The Workshop: a desk with a retro computer -->
+  <g>
+    <rect x="200" y="642" width="420" height="26" fill="#A0704C"/>
+    <polygon points="200,668 620,668 600,684 220,684" fill="#7E5538"/>
+    <polygon points="232,684 252,684 246,800 226,800" fill="#7E5538"/>
+    <polygon points="566,684 586,684 594,800 574,800" fill="#7E5538"/>
+    <!-- computer -->
+    <polygon points="292,452 492,452 500,612 284,612" fill="#EFE6D2"/>
+    <polygon points="492,452 500,612 470,612" fill="#D9CDB5"/>
+    <rect x="312" y="472" width="160" height="112" rx="10" fill="#2F6E70"/>
+    <polygon points="312,472 472,472 312,584" fill="#3B8183" opacity="0.6"/>
+    <g fill="#9BE08E" font-family="ui-monospace, Menlo, monospace" font-size="17">
+      <text x="326" y="502">cat.move(10)</text>
+      <text x="326" y="528">4.times do</text>
+      <text x="344" y="554" fill="#F2B544">cat.say("hi")</text>
+      <rect x="326" y="566" width="10" height="14" class="blink"/>
+    </g>
+    <polygon points="352,612 432,612 446,642 338,642" fill="#D9CDB5"/>
+    <polygon points="296,630 520,630 540,642 280,642" fill="#585852"/>
+    <!-- lamp -->
+    <line x1="560" y1="642" x2="590" y2="520" stroke="#3A3A35" stroke-width="6" stroke-linecap="round"/>
+    <line x1="590" y1="520" x2="540" y2="470" stroke="#3A3A35" stroke-width="6" stroke-linecap="round"/>
+    <polygon points="510,452 572,486 538,500" fill="#F2B544"/>
+    <polygon points="510,452 538,500 520,494" fill="#D69A2D"/>
+    <!-- mug with steam -->
+    <rect x="232" y="604" width="38" height="38" rx="6" fill="#E8735A"/>
+    <path d="M270,614 q16,4 0,20" fill="none" stroke="#E8735A" stroke-width="6"/>
+    <path d="M244,592 q-10,-14 0,-28 q10,-14 0,-28" fill="none" stroke="#CFC4B3" stroke-width="4" stroke-linecap="round" class="steam"/>
+  </g>
+
+  <!-- 2 · Coach Bot: a friendly robot -->
+  <g class="bob">
+    <line x1="1000" y1="420" x2="1000" y2="380" stroke="#3A3A35" stroke-width="6"/>
+    <circle cx="1000" cy="372" r="14" fill="#F2B544" class="pulse-dot"/>
+    <polygon points="924,420 1076,420 1088,540 912,540" fill="#B794DB"/>
+    <polygon points="1076,420 1088,540 1050,540" fill="#9474BD"/>
+    <polygon points="924,420 1000,420 950,470" fill="#C9AEE6"/>
+    <circle cx="966" cy="474" r="20" fill="#FFFDF8"/><circle cx="1034" cy="474" r="20" fill="#FFFDF8"/>
+    <circle cx="970" cy="478" r="9" fill="#3A3A35"/><circle cx="1038" cy="478" r="9" fill="#3A3A35"/>
+    <path d="M974,512 q26,18 52,0" fill="none" stroke="#3A3A35" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="940,552 1060,552 1068,690 932,690" fill="#9474BD"/>
+    <polygon points="1060,552 1068,690 1036,690" fill="#7A5CA6"/>
+    <rect x="962" y="576" width="76" height="60" rx="8" fill="#2F6E70"/>
+    <text x="1000" y="622" text-anchor="middle" font-size="40" font-weight="900" fill="#F2B544">?</text>
+    <polygon points="932,566 890,640 906,648 940,590" fill="#B794DB"/>
+    <polygon points="1068,566 1110,640 1094,648 1060,590" fill="#B794DB"/>
+    <circle cx="960" cy="720" r="30" fill="#585852"/><circle cx="1040" cy="720" r="30" fill="#585852"/>
+    <circle cx="960" cy="720" r="12" fill="#C9C2B5"/><circle cx="1040" cy="720" r="12" fill="#C9C2B5"/>
+  </g>
+  <g>
+    <polygon points="1100,330 1240,330 1240,400 1150,400 1126,428 1130,400 1100,400" fill="#FFFDF8" stroke="#3A3A35" stroke-width="4" stroke-linejoin="round"/>
+    <text class="world-script" x="1170" y="380" text-anchor="middle" font-size="40" fill="#3A3A35">Hi!</text>
+  </g>
+
+  <!-- 4 · The Library: shelves of floppy disks and books -->
+  <g>
+    <rect x="2190" y="470" width="300" height="330" fill="#A0704C"/>
+    <polygon points="2490,470 2510,486 2510,800 2490,800" fill="#7E5538"/>
+    <rect x="2206" y="486" width="268" height="88" fill="#7E5538"/>
+    <rect x="2206" y="590" width="268" height="88" fill="#7E5538"/>
+    <rect x="2206" y="694" width="268" height="90" fill="#7E5538"/>
+    <% [ [ 2214, "#E8735A" ], [ 2268, "#4FA3A5" ], [ 2322, "#F2B544" ], [ 2376, "#B794DB" ], [ 2430, "#585852" ] ].each do |dx, c| %>
+      <g transform="translate(<%= dx %> 504)"><rect width="44" height="62" rx="3" fill="<%= c %>"/><rect x="9" y="5" width="26" height="18" fill="#FFFDF8"/><rect x="30" y="44" width="8" height="10" fill="#3A3A35" opacity="0.5"/></g>
+    <% end %>
+    <% [ [ 2214, 22, "#4FA3A5" ], [ 2240, 30, "#E8735A" ], [ 2274, 18, "#F2B544" ], [ 2296, 26, "#B794DB" ], [ 2326, 34, "#8FB996" ], [ 2364, 22, "#E8735A" ], [ 2390, 28, "#4FA3A5" ], [ 2422, 20, "#F2B544" ], [ 2446, 22, "#B794DB" ] ].each do |bx, w, c| %>
+      <rect x="<%= bx %>" y="606" width="<%= w %>" height="72" fill="<%= c %>"/>
+    <% end %>
+    <polygon points="2214,784 2290,700 2304,712 2232,784" fill="#F2B544"/>
+    <% [ [ 2314, "#B794DB" ], [ 2368, "#E8735A" ], [ 2422, "#4FA3A5" ] ].each do |dx, c| %>
+      <g transform="translate(<%= dx %> 714)"><rect width="44" height="62" rx="3" fill="<%= c %>"/><rect x="9" y="5" width="26" height="18" fill="#FFFDF8"/></g>
+    <% end %>
+  </g>
+
+  <!-- 5 · The Vault: a server tower with a padlock -->
+  <g>
+    <polygon points="2730,400 2930,400 2944,800 2716,800" fill="#4A4A45"/>
+    <polygon points="2930,400 2944,800 2904,800" fill="#3A3A35"/>
+    <% 6.times do |i| %>
+      <rect x="2748" y="<%= 420 + i * 60 %>" width="164" height="44" rx="4" fill="#585852"/>
+      <circle cx="2770" cy="<%= 442 + i * 60 %>" r="6" fill="<%= i.even? ? '#9BE08E' : '#F2B544' %>" class="<%= i.even? ? 'blink' : 'blink-slow' %>"/>
+      <rect x="2790" y="<%= 438 + i * 60 %>" width="100" height="8" rx="2" fill="#3A3A35"/>
+    <% end %>
+    <path d="M2790,690 v-36 a40,40 0 0 1 80,0 v36" fill="none" stroke="#C9C2B5" stroke-width="14"/>
+    <rect x="2770" y="686" width="120" height="96" rx="12" fill="#F2B544"/>
+    <polygon points="2770,686 2890,686 2770,782" fill="#F6C566"/>
+    <circle cx="2830" cy="726" r="12" fill="#3A3A35"/><rect x="2824" y="730" width="12" height="28" fill="#3A3A35"/>
+  </g>
+
+  <!-- 6 · Launch Pad: a tower and a rocket -->
+  <g>
+    <g stroke="#3A3A35" stroke-width="6" fill="none">
+      <line x1="3140" y1="800" x2="3160" y2="360"/><line x1="3220" y1="800" x2="3200" y2="360"/>
+      <% 7.times do |i| %><line x1="<%= 3141 + i * 3 %>" y1="<%= 760 - i * 60 %>" x2="<%= 3219 - i * 3 %>" y2="<%= 700 - i * 60 %>"/><% end %>
+      <line x1="3210" y1="470" x2="3262" y2="470"/>
+    </g>
+    <g class="hover-rocket">
+      <polygon points="3300,280 3354,380 3354,640 3246,640 3246,380" fill="#FFFDF8"/>
+      <polygon points="3300,280 3354,380 3354,640 3318,640" fill="#EFE6D2"/>
+      <polygon points="3300,280 3354,380 3246,380" fill="#E8735A"/>
+      <polygon points="3300,280 3354,380 3310,380" fill="#C95A43"/>
+      <circle cx="3300" cy="450" r="30" fill="#2F6E70" stroke="#585852" stroke-width="8"/>
+      <circle cx="3290" cy="440" r="9" fill="#9CC9E6"/>
+      <polygon points="3246,560 3196,680 3246,640" fill="#E8735A"/>
+      <polygon points="3354,560 3404,680 3354,640" fill="#C95A43"/>
+      <polygon points="3282,640 3318,640 3310,700 3290,700" fill="#585852"/>
+      <polygon points="3270,700 3330,700 3300,760" fill="#F2B544" class="flame"/>
+      <polygon points="3284,700 3316,700 3300,736" fill="#E8735A" class="flame"/>
+    </g>
+    <rect x="3170" y="790" width="260" height="20" fill="#585852"/>
+    <g fill="#FFFDF8">
+      <polygon points="3180,790 3220,756 3270,770 3290,790"/>
+      <polygon points="3320,790 3350,760 3410,766 3440,790"/>
+    </g>
+  </g>
+
+  <!-- Paper grain over everything -->
+  <rect width="3600" height="1000" filter="url(#grain)" fill="#000" opacity="1" pointer-events="none"/>
+</svg>

@@ -1,0 +1,26 @@
+<% content_for :title, "Parent login" %>
+<div class="narrow parent-page">
+  <p class="eyebrow parent-brand"><%= brand_mark(size: 22) %> Launchpad · for parents and guardians</p>
+  <% if @guardianship.claimed? %>
+    <h1>You're all set</h1>
+    <p>This invite is already used. <%= link_to "Sign in", new_session_path %> with <strong><%= @guardianship.email %></strong>.</p>
+  <% elsif current_user&.parent? && current_user.username == @guardianship.email %>
+    <h1>Add <%= @guardianship.student.first_name %>?</h1>
+    <p>We'll add <%= @guardianship.student.first_name %> to your parent account.</p>
+    <%= button_to "Add #{@guardianship.student.first_name}", join_path(@guardianship.token), class: "btn btn-primary btn-lg" %>
+  <% elsif @existing %>
+    <h1>You already have a login</h1>
+    <p><%= button_to "Sign in to add #{@guardianship.student.first_name}", join_path(@guardianship.token), class: "btn btn-primary" %></p>
+  <% else %>
+    <h1>See <%= @guardianship.student.first_name %>'s work</h1>
+    <p class="lede">Make a parent login. You'll see projects, goals, and teacher feedback, and you can message the teacher.</p>
+    <% if @errors.present? %><p class="flash flash-alert"><%= @errors.to_sentence %></p><% end %>
+    <%= form_with url: join_path(@guardianship.token), class: "stack", style: "margin-top: 20px" do %>
+      <label class="field"><span>Email (this is your username)</span><input type="email" value="<%= @guardianship.email %>" readonly></label>
+      <label class="field"><span>Your name</span><%= text_field_tag :name, params[:name] || @guardianship.name, required: true, autocomplete: "name" %></label>
+      <label class="field"><span>Password (10 or more characters)</span><%= password_field_tag :password, nil, required: true, minlength: 10, autocomplete: "new-password" %></label>
+      <label class="field"><span>Password again</span><%= password_field_tag :password_confirmation, nil, required: true, minlength: 10, autocomplete: "new-password" %></label>
+      <%= submit_tag "Make my parent login", class: "btn btn-primary btn-lg btn-block" %>
+    <% end %>
+  <% end %>
+</div>

@@ -57,6 +57,19 @@ Rails.application.configure do
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: ENV.fetch("LAUNCHPAD_HOST", "example.com"), protocol: "https" }
 
+  # Email goes out over SMTP once it's configured. Until then (a demo), nothing is sent: staff copy the
+  # permission and parent-invite links from the student page instead.
+  if ENV["SMTP_ADDRESS"].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address: ENV["SMTP_ADDRESS"], port: ENV.fetch("SMTP_PORT", 587).to_i,
+      user_name: ENV["SMTP_USERNAME"], password: ENV["SMTP_PASSWORD"],
+      authentication: :plain, enable_starttls_auto: true
+    }
+  else
+    config.action_mailer.perform_deliveries = false
+  end
+
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.
   # config.action_mailer.smtp_settings = {
   #   user_name: Rails.application.credentials.dig(:smtp, :user_name),

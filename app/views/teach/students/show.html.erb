@@ -5,6 +5,36 @@
     <h1><%= @student.name %></h1>
     <p class="muted">Current stage: <strong><%= @stage.name %></strong></p>
   </div>
+  <div class="row">
+    <%= form_with url: teach_student_path(@student), method: :patch, class: "tier-form field-inline" do %>
+      <span class="label">Tier</span>
+      <%= select_tag :tier, options_for_select([ [ "#{User::TIERS.dig(User.default_tier_for(@student.grade), :name)} (grade default)", "" ] ] + User::TIERS.map { |k, t| [ t[:name], k ] }, @student.ui_tier.to_s),
+            onchange: "this.form.requestSubmit()", aria: { label: "Tier for #{@student.name}" }, class: ("is-override" if @student.tier_overridden?) %>
+    <% end %>
+    <%= link_to "Messages", message_thread_path(@student), class: "btn btn-quiet" %>
+  </div>
+</section>
+
+<section class="card consent-card" id="family">
+  <div class="row between">
+    <h2>Family</h2>
+    <span class="muted small">Parents see this student's work, goals, and feedback, and share their message thread.</span>
+  </div>
+  <ul class="rows">
+    <% @guardians.each do |g| %>
+      <li class="row-item">
+        <span class="row-num"><%= g.claimed? ? "✓" : "…" %></span>
+        <div><p class="row-name" style="font-size: 1.1rem"><%= g.name %></p><p class="row-meta"><%= g.email %> · <%= g.claimed? ? "has a parent login" : "invited, not joined yet" %></p></div>
+        <div class="row-aside"><% unless g.claimed? %><span class="small muted">Join link: <code class="copyable"><%= join_url(g.token) %></code></span><% end %></div>
+      </li>
+    <% end %>
+    <% if @guardians.empty? %><li class="row-empty">No parents linked yet.</li><% end %>
+  </ul>
+  <%= form_with model: Guardianship.new, url: teach_student_guardianships_path(@student), class: "row", style: "margin-top: 14px" do |f| %>
+    <%= f.text_field :name, placeholder: "Parent's name", required: true, style: "width: auto; flex: 1; min-width: 160px", aria: { label: "Parent's name" } %>
+    <%= f.email_field :email, placeholder: "Parent's email", required: true, style: "width: auto; flex: 1; min-width: 200px", aria: { label: "Parent's email" } %>
+    <%= f.submit "Invite a parent", class: "btn btn-primary btn-sm" %>
+  <% end %>
 </section>
 
 <% if @consent %>
@@ -59,7 +89,7 @@
       <%= link_to teach_project_path(project), class: "project-tile" do %>
         <span class="project-title"><%= project.title %></span>
         <span class="share-bar"><span style="width: <%= project.kid_share %>%"></span></span>
-        <span class="small"><%= project.kid_share %>% written by student · <%= project.line_counts[:ai] %> AI lines
+        <span class="small"><%= project.kid_share %>% written by student · <%= project.line_counts[:ai] %> AI lines<% if project.open_review %> · <strong class="warn">turned in, needs grading</strong><% end %>
           <% if project.needs_hand_edit? %> · <strong class="warn">no hand edits after AI</strong><% end %></span>
       <% end %>
     <% end %>

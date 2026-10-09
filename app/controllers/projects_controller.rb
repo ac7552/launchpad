@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
   before_action :require_student
-  before_action :set_project, only: %i[show update destroy back_to_blocks]
+  before_action :set_project, only: %i[show update destroy back_to_blocks turn_in]
 
   def index
     @projects = current_user.projects.order(updated_at: :desc)
@@ -24,6 +24,8 @@ class ProjectsController < ApplicationController
     @modes = @policy ? @policy.modes_for(current_user) : []
     @interactions = @project.ai_interactions.where(help_session_id: nil)
     @session = @project.help_sessions.active.last
+    @open_review = @project.open_review
+    @review = @project.latest_returned_review
   end
 
   # Autosave from the editor (JSON). The kid is the author of anything typed or snapped here.
@@ -41,6 +43,11 @@ class ProjectsController < ApplicationController
   def back_to_blocks
     @project.update!(editor_mode: @project.stage.editor)
     redirect_to @project, notice: "Back to blocks. Your Ruby was rebuilt from your blocks."
+  end
+
+  def turn_in
+    @project.turn_in!(note: params[:note])
+    redirect_to @project, notice: "Turned in! Your teacher will look at it soon."
   end
 
   def destroy

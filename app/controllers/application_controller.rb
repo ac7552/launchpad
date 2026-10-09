@@ -26,6 +26,10 @@ class ApplicationController < ActionController::Base
       redirect_to root_path, alert: "That page is for students." unless current_user&.student?
     end
 
+    def require_parent
+      redirect_to root_path, alert: "That page is for parents." unless current_user&.parent?
+    end
+
     def require_staff
       redirect_to root_path, alert: "That page is for teachers." unless current_user&.staff?
     end

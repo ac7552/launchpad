@@ -33,6 +33,27 @@
     <p class="banner">💎 You're in Ruby mode. Your blocks are paused.</p>
   <% end %>
 
+  <% if @review %>
+    <section class="feedback-card" aria-label="Feedback from your teacher">
+      <p class="script">From <%= @review.reviewer&.name || "your teacher" %></p>
+      <div class="feedback-scores">
+        <% ProjectReview::CRITERIA.each do |key, c| %>
+          <span><strong><%= c[:name] %></strong> <%= stars(@review.public_send(key)) %></span>
+        <% end %>
+      </div>
+      <p style="margin: 0"><%= @review.feedback %></p>
+    </section>
+  <% end %>
+
+  <% if @open_review %>
+    <p class="banner">📬 Turned in! Your teacher will look at it soon.</p>
+  <% else %>
+    <%= form_with url: turn_in_project_path(@project), class: "turnin", data: { action: "submit->editor#saveBeforeSubmit" } do %>
+      <%= text_field_tag :note, nil, maxlength: 500, placeholder: "Anything to tell your teacher? (you can skip this)", aria: { label: "Note for your teacher" } %>
+      <%= submit_tag "Turn in to my teacher", class: "btn btn-blue btn-sm" %>
+    <% end %>
+  <% end %>
+
   <div class="editor-grid editor-<%= mode %>">
     <div class="code-col">
       <% if mode.in?(%w[blocks split]) %>

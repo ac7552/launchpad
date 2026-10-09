@@ -1,0 +1,71 @@
+<% content_for :title, "Students" %>
+<header class="page-head page-head-row">
+  <div>
+    <p class="label">[ <%= format("%02d", @students.size) %> ] students</p>
+    <h1>Students</h1>
+    <p class="lede">Set each student's tier, see where they are, and find work to grade.</p>
+  </div>
+  <div class="row">
+    <%= link_to "Grading", teach_grading_index_path, class: "btn btn-quiet" %>
+    <%= link_to "Classes", teach_classrooms_path, class: "btn btn-quiet" %>
+  </div>
+</header>
+
+<div class="tier-key">
+  <% User::TIERS.each do |key, t| %>
+    <span class="tier-chip tier-<%= key %>"><strong><%= t[:name] %></strong> grades <%= t[:grades].min %>–<%= t[:grades].max %></span>
+  <% end %>
+  <span class="muted small">Tiers change how Launchpad looks and talks. They never change what a student may do with AI.</span>
+</div>
+
+<%= form_with url: teach_students_path, method: :get, class: "filter-bar", data: { turbo_action: "replace" } do %>
+  <label class="field-inline"><span class="label">Class</span>
+    <%= select_tag :classroom_id, options_from_collection_for_select(@classrooms, :id, :name, params[:classroom_id]), include_blank: "All classes", onchange: "this.form.requestSubmit()" %></label>
+  <label class="field-inline"><span class="label">Tier</span>
+    <%= select_tag :tier, options_for_select(User::TIERS.map { |k, t| [ t[:name], k ] }, params[:tier]), include_blank: "All tiers", onchange: "this.form.requestSubmit()" %></label>
+<% end %>
+
+<%= form_with url: bulk_tier_teach_students_path(request.query_parameters.slice("classroom_id", "tier")), id: "bulk-tier", class: "bulk-bar" do %>
+  <span class="label">Selected students</span>
+  <%= select_tag :tier, options_for_select([ [ "Default for their grade", "" ] ] + User::TIERS.map { |k, t| [ t[:name], k ] }), aria: { label: "Tier for selected students" } %>
+  <%= submit_tag "Move selected", class: "btn btn-primary btn-sm" %>
+<% end %>
+
+<div class="table-wrap">
+  <table class="table admin-table">
+    <thead>
+      <tr>
+        <th><span class="sr-only">Select</span></th>
+        <th>Student</th><th>Grade</th><th>Tier</th><th>Level</th><th>Goals</th><th>Permission</th><th>To grade</th><th>Last on</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @students.each do |student| %>
+        <% stage = student.current_stage %>
+        <% done = student.skill_checks.count { |c| stage.milestones.any? { |m| m.id == c.milestone_id } } %>
+        <% waiting = student.projects.sum { |p| p.reviews.count(&:submitted?) } %>
+        <tr>
+          <td><%= check_box_tag "student_ids[]", student.id, false, form: "bulk-tier", id: "pick_#{student.id}", aria: { label: "Select #{student.name}" } %></td>
+          <td><%= link_to student.name, teach_student_path(student), class: "strong" %><br><span class="muted small"><%= student.classrooms.map(&:name).join(", ") %></span></td>
+          <td><%= student.grade %></td>
+          <td>
+            <%= form_with url: teach_student_path(student), method: :patch, class: "tier-form" do %>
+              <%= select_tag :tier, options_for_select([ [ "#{User::TIERS.dig(User.default_tier_for(student.grade), :name)} (grade default)", "" ] ] + User::TIERS.map { |k, t| [ t[:name], k ] }, student.ui_tier.to_s),
+                    onchange: "this.form.requestSubmit()", aria: { label: "Tier for #{student.name}" }, class: ("is-override" if student.tier_overridden?) %>
+            <% end %>
+          </td>
+          <td><%= stage.position %> · <%= stage.kid_name %></td>
+          <td><span class="meter"><span style="width: <%= stage.milestones.empty? ? 0 : done * 100 / stage.milestones.size %>%"></span></span> <%= done %>/<%= stage.milestones.size %></td>
+          <td>
+            <% if !student.consent_required? %><span class="muted small">13+</span>
+            <% elsif student.parent_consent&.account_allowed? %><span class="badge badge-delivered">OK</span>
+            <% else %><span class="badge badge-held">Waiting</span><% end %>
+          </td>
+          <td><% if waiting.positive? %><%= link_to "#{waiting} to grade", teach_grading_index_path, class: "badge badge-held" %><% else %><span class="muted small">—</span><% end %></td>
+          <td class="muted small"><%= student.last_active_at ? "#{time_ago_in_words(student.last_active_at).delete_prefix('about ')} ago" : "never" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<% if @students.empty? %><p class="row-empty">No students match.</p><% end %>

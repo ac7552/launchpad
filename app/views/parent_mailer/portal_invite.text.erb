@@ -1,0 +1,9 @@
+Hi <%= @guardianship.name %>,
+
+<%= @guardianship.student.first_name %>'s coding program invited you to Launchpad's parent portal.
+There you can see <%= @guardianship.student.first_name %>'s projects, goals, and teacher feedback, and message the teacher.
+
+Make your parent login here:
+<%= @link %>
+
+Questions? Contact <%= @operator[:name] %> at <%= @operator[:email] %>.

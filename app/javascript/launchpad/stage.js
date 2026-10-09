@@ -7,7 +7,7 @@ const SPRITES = {
   star: { emoji: "⭐", style: "rotate", offset: 0 }
 }
 const BACKGROUNDS = {
-  white: "#ffffff", sky: "#bfe3ff", grass: "#c8ecb4", night: "#1d2442", space: "#0b0e1f", sand: "#f4e2b8"
+  white: "#fffdf8", sky: "#cfe4ea", grass: "#d6e6c8", night: "#2b2f45", space: "#1d1c24", sand: "#f3e2c0"
 }
 const MOVE_SPEED = 0.45   // pixels per ms
 const TURN_SPEED = 0.9    // degrees per ms

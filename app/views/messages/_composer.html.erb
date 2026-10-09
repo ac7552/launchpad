@@ -1,0 +1,5 @@
+<%# locals: (thread:) %>
+<%= form_with url: message_thread_path(thread.student), class: "composer", id: "composer" do %>
+  <%= text_area_tag :body, nil, rows: 2, maxlength: 1000, required: true, placeholder: "Write a message…", aria: { label: "Message" } %>
+  <%= submit_tag "Send", class: "btn btn-primary" %>
+<% end %>

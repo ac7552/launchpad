@@ -23,6 +23,10 @@ class StudentExport
       typed_questions: @student.ai_interactions.where(help_session_id: nil).map do |i|
         { asked: i.prompt, answer: i.response_text, status: i.status, created_at: i.created_at }
       end,
+      grades: ProjectReview.returned.joins(:project).where(projects: { student_id: @student.id }).includes(:project).map do |r|
+        { project: r.project.title, coding: r.coding, problem_solving: r.problem_solving, made_it_yours: r.ownership, feedback: r.feedback, returned_at: r.returned_at }
+      end,
+      messages: Array(@student.message_thread&.messages&.includes(:author)).map { |m| { from: m.author.name, at: m.created_at, message: m.body } },
       sign_ins: @student.sessions.map { |s| { at: s.created_at, ip_address: s.ip_address, browser: s.user_agent } }
     }
   end

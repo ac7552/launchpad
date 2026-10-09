@@ -1,0 +1,38 @@
+<% content_for :title, "Grading" %>
+<header class="page-head">
+  <p class="label">[ <%= format("%02d", @waiting.size) %> ] turned in</p>
+  <h1>Grading</h1>
+  <p class="lede">Open a project, read the code, score three things from 1 to 4, and write a few kind, specific words.</p>
+</header>
+
+<p class="label section-label">Waiting for you</p>
+<ol class="rows">
+  <% @waiting.each_with_index do |r, i| %>
+    <li>
+      <%= link_to teach_project_path(r.project, anchor: "grade"), class: "row-item" do %>
+        <span class="row-num"><%= format("%02d", i + 1) %></span>
+        <div>
+          <p class="row-name"><%= r.project.title %></p>
+          <p class="row-meta"><%= r.student.name %> · turned in <%= time_ago_in_words(r.submitted_at).delete_prefix("about ") %> ago<%= " · \"#{r.student_note.truncate(60)}\"" if r.student_note %></p>
+        </div>
+        <span class="row-aside row-arrow" aria-hidden="true">→</span>
+      <% end %>
+    </li>
+  <% end %>
+  <% if @waiting.empty? %><li class="row-empty">Nothing to grade. 🎉</li><% end %>
+</ol>
+
+<% if @returned.any? %>
+  <p class="label section-label">Recently returned</p>
+  <ol class="rows">
+    <% @returned.each_with_index do |r, i| %>
+      <li class="row-item">
+        <span class="row-num"><%= format("%02d", i + 1) %></span>
+        <div>
+          <p class="row-name" style="font-size: 1.15rem"><%= link_to r.project.title, teach_project_path(r.project) %></p>
+          <p class="row-meta"><%= r.student.name %> · <% ProjectReview::CRITERIA.each do |key, c| %><%= c[:name] %> <%= r.public_send(key) %>/4 · <% end %>by <%= r.reviewer&.name %></p>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+<% end %>

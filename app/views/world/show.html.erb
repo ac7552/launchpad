@@ -1,0 +1,61 @@
+<% content_for :title, "World" %>
+<% content_for :main_class, "world-main" %>
+<% level = current_user.student? ? current_user.current_stage.position : nil %>
+<div class="world" data-controller="world" data-action="keydown@window->world#key">
+  <div class="world-hint" data-world-target="hint">
+    <p class="script">Hi, <%= current_user.first_name %>! Welcome to Launchpad.</p>
+    <p>Drag to explore. Tap a glowing dot.</p>
+  </div>
+
+  <div class="world-viewport" data-world-target="viewport" tabindex="0" aria-label="The Launchpad world. Use the arrow keys or drag to look around."
+       data-action="pointerdown->world#grab wheel->world#wheel scroll->world#scrolled">
+    <div class="world-track">
+      <%= render "world/scene", level: %>
+      <% @spots.each_with_index do |spot, i| %>
+        <button type="button" class="spot spot-<%= spot.key %>" style="left: <%= (spot.x / 36.0).round(2) %>%; top: <%= (spot.y / 10.0).round(2) %>%"
+                data-action="world#open" data-world-spot-param="<%= spot.key %>" aria-haspopup="dialog">
+          <span class="spot-dot" aria-hidden="true"></span>
+          <span class="spot-text">
+            <span class="spot-num"><%= format("%02d", i + 1) %></span>
+            <span class="spot-name script"><%= spot.name %></span>
+            <span class="spot-label"><%= spot.label %></span>
+          </span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <button type="button" class="round-btn world-prev" data-action="world#prev" aria-label="Look left">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <button type="button" class="round-btn world-next" data-action="world#next" aria-label="Look right">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+
+  <nav class="world-strip" aria-label="Places">
+    <div class="strip-track"><span class="strip-fill" data-world-target="progress"></span></div>
+    <% @spots.each_with_index do |spot, i| %>
+      <button type="button" data-world-target="place" data-action="world#jump" data-world-x-param="<%= spot.x %>" data-world-spot-param="<%= spot.key %>">
+        <span class="strip-num"><%= format("%02d", i + 1) %></span><span class="strip-name"><%= spot.name.delete_prefix("The ") %></span>
+      </button>
+    <% end %>
+  </nav>
+
+  <aside class="world-panel" data-world-target="panel" hidden role="dialog" aria-modal="false" aria-labelledby="panel-title">
+    <button type="button" class="round-btn panel-close" data-action="world#close" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div data-world-target="panelBody"></div>
+  </aside>
+
+  <% @spots.each_with_index do |spot, i| %>
+    <template data-world-target="story" data-spot="<%= spot.key %>">
+      <p class="label">[ <%= format("%02d", i + 1) %> ] <%= spot.label %></p>
+      <h2 id="panel-title" class="script panel-title"><%= spot.name %></h2>
+      <ul class="panel-lines">
+        <% spot.lines.each do |line| %><li><%= line %></li><% end %>
+      </ul>
+      <% if spot.path %><%= link_to "#{spot.action} →", spot.path, class: "btn btn-primary btn-lg btn-block" %><% end %>
+    </template>
+  <% end %>
+</div>

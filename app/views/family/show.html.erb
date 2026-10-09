@@ -1,0 +1,18 @@
+<% content_for :title, "Family" %>
+<header class="page-head">
+  <p class="label">[ <%= format("%02d", @children.size) %> ] <%= "child".pluralize(@children.size) %></p>
+  <h1>Welcome, <%= current_user.first_name %>.</h1>
+  <p class="lede">See what your children are building and how they're doing.</p>
+</header>
+<ol class="rows">
+  <% @children.each_with_index do |kid, i| %>
+    <li>
+      <%= link_to family_child_path(kid), class: "row-item" do %>
+        <span class="row-num"><%= format("%02d", i + 1) %></span>
+        <div><p class="row-name"><%= kid.name %></p><p class="row-meta">Grade <%= kid.grade %> · Level <%= kid.current_stage.position %>: <%= kid.current_stage.kid_name %> · <%= pluralize(kid.projects.size, "project") %></p></div>
+        <span class="row-aside row-arrow" aria-hidden="true">→</span>
+      <% end %>
+    </li>
+  <% end %>
+  <% if @children.empty? %><li class="row-empty">No children linked yet. Use the invite link from your child's teacher.</li><% end %>
+</ol>

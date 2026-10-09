@@ -7,6 +7,7 @@ class Project < ApplicationRecord
   has_many :versions, -> { order(:created_at) }, class_name: "ProjectVersion", dependent: :destroy
   has_many :ai_interactions, -> { order(:created_at) }, dependent: :destroy
   has_many :help_sessions, -> { order(:created_at) }, dependent: :destroy
+  has_many :reviews, -> { order(:submitted_at) }, class_name: "ProjectReview", dependent: :destroy
 
   validates :title, presence: true, length: { maximum: 80 }
   validates :editor_mode, inclusion: { in: Stage::EDITORS }
@@ -45,6 +46,14 @@ class Project < ApplicationRecord
 
   # "Hand edits in every project": at least one meaningful change by the kid after AI wrote code.
   def needs_hand_edit? = line_counts[:ai].positive? && hand_edits_after_ai.zero?
+
+  def open_review = reviews.where(status: "submitted").last
+  def latest_returned_review = reviews.returned.last
+
+  # Turn the project in to the teacher. One open turn-in at a time.
+  def turn_in!(note: nil)
+    open_review || reviews.create!(student_note: note.to_s.strip.presence, code_snapshot: ruby_source, submitted_at: Time.current)
+  end
 
   def blocks_in_sync? = editor_mode != "ruby" && blocks_json.present?
 

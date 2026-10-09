@@ -1,0 +1,4 @@
+<p>Hi <%= @guardianship.name %>,</p>
+<p><%= @guardianship.student.first_name %>'s coding program invited you to Launchpad's parent portal. There you can see <%= @guardianship.student.first_name %>'s projects, goals, and teacher feedback, and message the teacher.</p>
+<p><a href="<%= @link %>">Make your parent login</a></p>
+<p>Questions? Contact <%= @operator[:name] %> at <%= @operator[:email] %>.</p>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_08_170000) do
   create_table "ai_interactions", force: :cascade do |t|
     t.integer "student_id", null: false
     t.integer "project_id", null: false
@@ -85,6 +85,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
     t.index ["student_id"], name: "index_enrollments_on_student_id"
   end
 
+  create_table "guardianships", force: :cascade do |t|
+    t.integer "student_id", null: false
+    t.integer "parent_id"
+    t.string "name", null: false
+    t.string "email", null: false
+    t.string "token", null: false
+    t.datetime "claimed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["parent_id"], name: "index_guardianships_on_parent_id"
+    t.index ["student_id", "email"], name: "index_guardianships_on_student_id_and_email", unique: true
+    t.index ["student_id"], name: "index_guardianships_on_student_id"
+    t.index ["token"], name: "index_guardianships_on_token", unique: true
+  end
+
   create_table "help_sessions", force: :cascade do |t|
     t.integer "student_id", null: false
     t.integer "project_id", null: false
@@ -104,6 +119,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
     t.index ["project_id"], name: "index_help_sessions_on_project_id"
     t.index ["resolved_by_id"], name: "index_help_sessions_on_resolved_by_id"
     t.index ["student_id"], name: "index_help_sessions_on_student_id"
+  end
+
+  create_table "message_threads", force: :cascade do |t|
+    t.integer "student_id", null: false
+    t.datetime "last_message_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["student_id"], name: "index_message_threads_on_student_id", unique: true
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.integer "message_thread_id", null: false
+    t.integer "author_id", null: false
+    t.text "body", null: false
+    t.boolean "urgent", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_messages_on_author_id"
+    t.index ["message_thread_id"], name: "index_messages_on_message_thread_id"
   end
 
   create_table "milestones", force: :cascade do |t|
@@ -140,6 +174,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
     t.index ["student_id"], name: "index_parent_consents_on_student_id", unique: true
     t.index ["token"], name: "index_parent_consents_on_token", unique: true
     t.index ["verified_by_id"], name: "index_parent_consents_on_verified_by_id"
+  end
+
+  create_table "project_reviews", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "reviewer_id"
+    t.string "status", default: "submitted", null: false
+    t.text "student_note"
+    t.text "code_snapshot"
+    t.integer "coding"
+    t.integer "problem_solving"
+    t.integer "ownership"
+    t.text "feedback"
+    t.datetime "submitted_at", null: false
+    t.datetime "returned_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_project_reviews_on_project_id"
+    t.index ["reviewer_id"], name: "index_project_reviews_on_reviewer_id"
   end
 
   create_table "project_versions", force: :cascade do |t|
@@ -217,6 +269,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
     t.index ["position"], name: "index_stages_on_position", unique: true
   end
 
+  create_table "thread_reads", force: :cascade do |t|
+    t.integer "message_thread_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "last_read_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_thread_id", "user_id"], name: "index_thread_reads_on_message_thread_id_and_user_id", unique: true
+    t.index ["message_thread_id"], name: "index_thread_reads_on_message_thread_id"
+    t.index ["user_id"], name: "index_thread_reads_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "username", null: false
@@ -227,6 +290,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
     t.datetime "updated_at", null: false
     t.integer "birth_year"
     t.datetime "last_active_at"
+    t.string "ui_tier"
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
@@ -240,13 +304,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
   add_foreign_key "data_deletions", "users", column: "requested_by_id"
   add_foreign_key "enrollments", "classrooms"
   add_foreign_key "enrollments", "users", column: "student_id"
+  add_foreign_key "guardianships", "users", column: "parent_id"
+  add_foreign_key "guardianships", "users", column: "student_id"
   add_foreign_key "help_sessions", "classrooms"
   add_foreign_key "help_sessions", "projects"
   add_foreign_key "help_sessions", "users", column: "resolved_by_id"
   add_foreign_key "help_sessions", "users", column: "student_id"
+  add_foreign_key "message_threads", "users", column: "student_id"
+  add_foreign_key "messages", "message_threads"
+  add_foreign_key "messages", "users", column: "author_id"
   add_foreign_key "milestones", "stages"
   add_foreign_key "parent_consents", "users", column: "student_id"
   add_foreign_key "parent_consents", "users", column: "verified_by_id"
+  add_foreign_key "project_reviews", "projects"
+  add_foreign_key "project_reviews", "users", column: "reviewer_id"
   add_foreign_key "project_versions", "projects"
   add_foreign_key "projects", "classrooms"
   add_foreign_key "projects", "stages"
@@ -255,4 +326,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_05_180000) do
   add_foreign_key "skill_checks", "milestones"
   add_foreign_key "skill_checks", "users", column: "checked_by_id"
   add_foreign_key "skill_checks", "users", column: "student_id"
+  add_foreign_key "thread_reads", "message_threads"
+  add_foreign_key "thread_reads", "users"
 end

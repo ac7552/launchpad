@@ -11,6 +11,49 @@
   </div>
 </section>
 
+<% if @open_review %>
+  <section class="card" id="grade" style="margin-bottom: 24px">
+    <div class="row between">
+      <h2 style="margin: 0">Grade this project</h2>
+      <span class="muted small">Turned in <%= time_ago_in_words(@open_review.submitted_at).delete_prefix("about ") %> ago</span>
+    </div>
+    <% if @open_review.student_note %><p class="ask"><strong>Student's note:</strong> <%= @open_review.student_note %></p><% end %>
+    <details><summary class="small">Code as turned in</summary><pre class="code"><%= @open_review.code_snapshot %></pre></details>
+    <%= form_with model: @open_review, url: teach_project_review_path(@open_review), method: :patch, class: "stack", style: "margin-top: 14px" do |f| %>
+      <div>
+        <% ProjectReview::CRITERIA.each do |key, c| %>
+          <div class="score-row">
+            <div><strong><%= c[:name] %></strong><br><span class="muted small"><%= c[:kid] %></span></div>
+            <fieldset class="score-pick">
+              <legend class="sr-only"><%= c[:name] %> score</legend>
+              <% ProjectReview::SCALE.each do |n, word| %>
+                <label><%= f.radio_button key, n, required: true %><span><%= n %> · <%= word %></span></label>
+              <% end %>
+            </fieldset>
+            <span></span>
+          </div>
+        <% end %>
+      </div>
+      <label class="field"><span>Feedback for <%= @project.student.first_name %></span>
+        <%= f.text_area :feedback, rows: 4, required: true, placeholder: "One thing that works, one thing to try next. Short words for younger students." %></label>
+      <%= f.submit "Return to #{@project.student.first_name}", class: "btn btn-primary" %>
+    <% end %>
+  </section>
+<% end %>
+
+<% if @returned.any? %>
+  <section style="margin-bottom: 24px">
+    <p class="label">Grades</p>
+    <ol class="rows">
+      <% @returned.each do |r| %>
+        <li class="row-item"><span class="row-num"><%= r.returned_at.to_date.to_fs(:short) %></span>
+          <div><p class="row-meta" style="margin: 0"><% ProjectReview::CRITERIA.each do |key, c| %><%= c[:name] %> <%= r.public_send(key) %>/4 · <% end %><%= r.reviewer&.name %></p><p style="margin: 6px 0 0"><%= r.feedback %></p></div>
+        </li>
+      <% end %>
+    </ol>
+  </section>
+<% end %>
+
 <div class="two-col">
   <section>
     <h2>Current code <span class="muted small">(highlighted lines came from the coach)</span></h2>

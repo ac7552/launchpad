@@ -1,0 +1,6 @@
+<%# locals: (message:) %>
+<% who = message.author.student? ? message.author.first_name : (message.author.parent? ? "#{message.author.name} (parent)" : "#{message.author.name} (teacher)") %>
+<div class="msg <%= 'staff' if message.from_staff? %> <%= 'urgent' if message.urgent? %>" data-author="<%= message.author_id %>" id="<%= dom_id(message) %>">
+  <div class="msg-who"><%= who %> · <%= message.created_at.strftime("%b %-d, %-l:%M %p") %><%= " · flagged for a check-in" if message.urgent? %></div>
+  <div class="msg-body"><%= message.body %></div>
+</div>
