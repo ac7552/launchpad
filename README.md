@@ -25,7 +25,7 @@ bin/setup            # installs gems, prepares the database, seeds the curriculu
 bin/rails server -p 3100
 ```
 
-Dev accounts and their password are in `db/seeds.rb` (teacher `ms.rivera`; students `maya` (4), `jalen` (5), `priya` (6), `theo` (7), `nia` (9, 13+); parent `maya.parent@example.com`).
+Dev accounts and their password are in `db/seeds.rb` (admin `admin_launchpad`; students `maya` (4), `student_launchpad` (5), `priya` (6), `theo` (7), `nia` (9, 13+); parent `maya.parent@example.com`).
 After running a migration, restart the dev server so it sees new columns.
 
 AI: set `ANTHROPIC_API_KEY` (or `anthropic.api_key` in credentials) to use Claude. Without a key the

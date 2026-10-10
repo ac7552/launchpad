@@ -151,19 +151,23 @@ end
 if Rails.env.development? || ENV["LAUNCHPAD_DEMO"] == "1"
   dev_password = Rails.env.development? ? "launchpad-dev" : ENV.fetch("LAUNCHPAD_DEMO_PASSWORD")
 
-  teacher = User.find_or_initialize_by(username: "ms.rivera")
-  teacher.update!(name: "Ms. Rivera", role: "teacher", password: dev_password)
+  # Demo usernames. Older seeds used ms.rivera and jalen; those accounts are renamed in place, not duplicated.
+  renamed = { "admin_launchpad" => "ms.rivera", "student_launchpad" => "jalen" }
+  find_account = ->(username) { User.find_by(username:) || User.find_by(username: renamed[username]) || User.new }
+
+  teacher = find_account.("admin_launchpad")
+  teacher.update!(username: "admin_launchpad", name: "Ms. Rivera", role: "admin", password: dev_password)
 
   room = Classroom.find_or_create_by!(name: "Room 12 — Grades 4–9", teacher:)
   room.policy.update!(light: "green") # shows both the guided coach and typed questions (13+ only)
 
-  # Covers each consent state: maya (verified, no AI coach), jalen (verified with AI coach),
+  # Covers each consent state: maya (verified, no AI coach), student_launchpad (verified with AI coach),
   # priya (parent signed, needs staff verification), theo (waiting for parent), nia (13+, no consent needed).
-  [ [ "maya", "Maya Lopez", 4, 2017, :verified_no_ai ], [ "jalen", "Jalen Brooks", 5, 2016, :verified_ai ],
+  [ [ "maya", "Maya Lopez", 4, 2017, :verified_no_ai ], [ "student_launchpad", "Jalen Brooks", 5, 2016, :verified_ai ],
     [ "priya", "Priya Shah", 6, 2015, :submitted ], [ "theo", "Theo Kim", 7, 2013, :requested ],
     [ "nia", "Nia Okafor", 9, 2011, nil ] ].each do |username, name, grade, birth_year, consent_state|
-    student = User.find_or_initialize_by(username:)
-    student.update!(name:, role: "student", grade:, birth_year:, password: dev_password)
+    student = find_account.(username)
+    student.update!(username:, name:, role: "student", grade:, birth_year:, password: dev_password)
     room.enrollments.find_or_create_by!(student:)
     next unless consent_state
 
@@ -196,11 +200,11 @@ if Rails.env.development? || ENV["LAUNCHPAD_DEMO"] == "1"
   end
 
   # A turned-in project waiting to be graded.
-  jalen = User.find_by!(username: "jalen")
+  jalen = User.find_by!(username: "student_launchpad")
   turned_in = jalen.projects.order(:created_at).first || jalen.projects.create!(title: "Rocket square")
   turned_in.turn_in!(note: "I made it go in a square") if turned_in.reviews.none?
 
-  puts "Dev accounts: teacher ms.rivera, students maya (4), jalen (5), nia (9, 13+); priya and theo await parent permission; parent maya.parent@example.com. Password: see db/seeds.rb"
+  puts "Dev accounts: admin admin_launchpad, students maya (4), student_launchpad (5), nia (9, 13+); priya and theo await parent permission; parent maya.parent@example.com. Password: see db/seeds.rb"
 end
 
 puts "Seeded #{Stage.count} stages and #{Milestone.count} milestones."
