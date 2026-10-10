@@ -204,7 +204,8 @@ if Rails.env.development? || ENV["LAUNCHPAD_DEMO"] == "1"
   turned_in = jalen.projects.order(:created_at).first || jalen.projects.create!(title: "Rocket square")
   turned_in.turn_in!(note: "I made it go in a square") if turned_in.reviews.none?
 
-  puts "Dev accounts: admin admin_launchpad, students maya (4), student_launchpad (5), nia (9, 13+); priya and theo await parent permission; parent maya.parent@example.com. Password: see db/seeds.rb"
+  puts "Dev accounts: admin admin_launchpad, students maya (4), student_launchpad (5), nia (9, 13+); priya and theo await parent permission; parent maya.parent@example.com. " \
+       "Password: #{Rails.env.development? ? 'launchpad-dev (development only)' : 'the LAUNCHPAD_DEMO_PASSWORD secret (~/.config/launchpad/demo-password on the deploying Mac)'}"
 end
 
 puts "Seeded #{Stage.count} stages and #{Milestone.count} milestones."
